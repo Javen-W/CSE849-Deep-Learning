@@ -10,15 +10,13 @@ from data import MyDataset
 Set the seed to the last five digits of your student number.
 E.g., if you are student number 160474145, set the seed to 74145.
 """
-overall_seed = None
+overall_seed = 59989
 
 """
 Set the seed to the last three digits of your student number.
 E.g., if you are student number 160474145, set the seed to 145.
 """
-model_seed = None
-
-# TODO: Set the seed
+model_seed = 989
 
 """
 Generate the dataset as describe in the HW pdf file. Complete the class
@@ -33,6 +31,7 @@ num_samples = 2000
 
 train_dataset = MyDataset(alpha, beta, num_samples, 'train', overall_seed)
 val_dataset = MyDataset(alpha, beta, num_samples, 'val', overall_seed)
+
 
 """
 Create a dataloader for each dataset.
