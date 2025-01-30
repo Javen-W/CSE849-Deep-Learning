@@ -45,4 +45,4 @@ class MyDataset(Dataset):
         TODO: Return the values of x and y indexed by the argument
         index. Remember to reshape the values to be of shape (1,).
         """
-        return self.x[index], self.y[index]
+        return self.x[index].reshape((1, )), self.y[index].reshape((1, ))

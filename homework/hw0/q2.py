@@ -118,17 +118,22 @@ for e in trange(num_epochs):
 
     for batch in tqdm(train_loader, leave=False, desc="Training"):
         # TODO: Zero the gradients
+        optimizer.zero_grad()
         
         # TODO: Unpack the batch. It is a tuple containing x and y.
+        x, y_true = batch
 
         # TODO: Pass it through the model to get the predicted y_hat.
+        y_hat = model(x)
 
         # TODO: Calculate the loss using the loss function.
-        loss = None
+        loss = loss_fn(y_hat, y_true)
 
         # TODO: Backpropagate the loss (use the backward function as instructed. There is no need to implement you own function for this project.)
+        loss.backward()
 
         # TODO: Update the model weights.
+        optimizer.step()
     
         # TODO: Store the training loss in the list
         train_step_list.append(step)
@@ -136,8 +141,18 @@ for e in trange(num_epochs):
         step += 1
     
     # Evaluate your model on the validation set
-
     # TODO: Set the model to eval and use torch.no_grad()
+    model.eval()
+    with torch.no_grad():
+        for batch in val_loader:
+            x, y_true = batch
+            y_hat = model(x)
+            loss = loss_fn(y_hat, y_true)
+
+            val_step_list.append(step)
+            val_loss_list.append(loss.item())
+            step += 1
+
 
 print("True parameters: alpha =", alpha, "beta =", beta)
 print("Estimated parameters: alpha =", model.weight.item(), "beta =", model.bias.item())
@@ -175,8 +190,9 @@ axs[1].set_title('Data and Fitted Model')
 axs[1].legend()
 
 fig.tight_layout()
-fig.savefig('q2_plot.png', dpi=300)
+fig.savefig('./results/q2_plot.png', dpi=300)
 plt.clf()
 plt.close(fig)
 
 # TODO: Save the model as q2_model.pt
+torch.save(model.state_dict(), './results/q2_model.pt')
