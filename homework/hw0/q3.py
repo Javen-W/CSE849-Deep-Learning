@@ -10,12 +10,14 @@ from q2 import model_seed
 Load the dataset from zip files
 """
 data = torch.load("HW0_data.pt", weights_only=True)
+print(data.keys())
 x_train = data['x_train']
 y_train = data['y_train']
 x_val = data['x_val']
 y_val = data['y_val']
 x_test = data['x_test']
 y_test = data['y_test']
+exit(1)
 
 """
 Create corresponding datasets.
@@ -97,10 +99,9 @@ for seed in seeds_list:
     w_list = []
     step = 0
 
-    for e in trange(num_epochs):
+    for _ in tqdm(range(num_epochs)):
         # TODO: Set your model to training mode.
         model.train()
-
         for batch in train_loader:
             # TODO: Zero the gradients
             optimizer.zero_grad()
@@ -150,12 +151,17 @@ for seed in seeds_list:
 Complete the model prediction visualization.
 """
 ax.scatter(x_train, y_train, label='Training Data', c="blue", marker=".")
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.grid(True)
+ax.set_title('Data and Fitted Models')
 ax.legend()
 plt.savefig('./results/q3_plot.png')
 
+"""
 # TODO: Run the model on the test set
 with torch.no_grad():
-    yhat_test = None
+    yhat_test = model(x_test).numpy()
 
 with open('./results/q3_test_output.txt', "w") as f:
     for yhat in yhat_test:
@@ -163,3 +169,4 @@ with open('./results/q3_test_output.txt', "w") as f:
 
 # TODO: Save the model as q3_model.pt
 torch.save(model.state_dict(), './results/q3_model.pt')
+"""
