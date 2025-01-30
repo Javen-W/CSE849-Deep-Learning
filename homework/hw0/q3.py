@@ -6,31 +6,33 @@ from tqdm import tqdm, trange
 from data import Q3Dataset
 from q2 import model_seed
 
+"""
+Load the dataset from zip files
+"""
+data = torch.load("HW0_data.pt", weights_only=True)
+x_train = data['x_train']
+y_train = data['y_train']
+x_val = data['x_val']
+y_val = data['y_val']
+x_test = data['x_test']
+y_test = data['y_test']
+
+"""
+Create corresponding datasets.
+"""
+train_dataset = Q3Dataset(x_train, y_train)
+val_dataset = Q3Dataset(x_val, y_val)
+test_dataset = Q3Dataset(x_test, y_test)
+
+"""
+TODO: For each seed, plot the fitted model along with the training
+data points. The data samples need to be plotted only once. Follow the
+instructions from q2.py on how to plot the results.
+"""
 seeds_list = [1, 2, 3, 4, 5]
-# TODO: For each seed, plot the fitted model along with the training
-# data points. The data samples need to be plotted only once. Follow the
-# instructions from q2.py on how to plot the results.
+fig, ax = plt.subplots()
 for seed in seeds_list:
     torch.manual_seed(seed)
-
-    """
-    Load the dataset from zip files
-    """
-    data = torch.load("HW0_data.pt", weights_only=True)
-
-    x_train = data['x_train']
-    y_train = data['y_train']
-    x_val = data['x_val']
-    y_val = data['y_val']
-    x_test = data['x_test']
-    y_test = data['y_test']
-
-    """
-    Create corresponding datasets.
-    """
-    train_dataset = Q3Dataset(x_train, y_train)
-    val_dataset = Q3Dataset(x_val, y_val)
-    test_dataset = Q3Dataset(x_test, y_test)
 
     """
     Create dataloaders for each dataset.
@@ -84,8 +86,10 @@ for seed in seeds_list:
     """
     loss_fn = nn.MSELoss()
 
+    """
+    Train the model.
+    """
     num_epochs = 1000
-
     train_step_list = []
     train_loss_list = []
     val_step_list = []
@@ -97,7 +101,7 @@ for seed in seeds_list:
         # TODO: Set your model to training mode.
         model.train()
 
-        for batch in tqdm(train_loader, leave=False, desc="Training"):
+        for batch in train_loader:
             # TODO: Zero the gradients
             optimizer.zero_grad()
             
@@ -134,14 +138,28 @@ for seed in seeds_list:
                 val_loss_list.append(loss.item())
                 step += 1
 
+    """
+    Visualize the model predictions.
+    """
+    predictions = model(x_train)
+    sorted_indices = torch.argsort(x_train)
+    ax.plot(x_train[sorted_indices], predictions[sorted_indices], label=f'Seed {seed}')
+
+
+"""
+Complete the model prediction visualization.
+"""
+ax.scatter(x_train, y_train, label='Training Data', c="blue", marker=".")
+ax.legend()
+plt.savefig('./results/q3_plot.png')
+
 # TODO: Run the model on the test set
 with torch.no_grad():
     yhat_test = None
 
-with open("q3_test_output.txt", "w") as f:
+with open('./results/q3_test_output.txt', "w") as f:
     for yhat in yhat_test:
         f.write(f"{yhat.item()}\n")
 
-
 # TODO: Save the model as q3_model.pt
-# torch.save(model.state_dict(), './results/q3_model.pt')
+torch.save(model.state_dict(), './results/q3_model.pt')
