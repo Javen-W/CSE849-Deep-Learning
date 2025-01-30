@@ -3,6 +3,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 from tqdm import tqdm, trange
+from data import Q3Dataset
 
 seeds_list = [1, 2, 3, 4, 5]
 # TODO: For each seed, plot the fitted model along with the training
@@ -14,18 +15,21 @@ for seed in seeds_list:
     """
     Load the dataset from zip files
     """
-    x_train = None
-    y_train = None
-    x_val = None
-    y_val = None
-    x_test = None
+    data = torch.load("HW0_data.pt", weights_only=True)
+
+    x_train = data['x_train']
+    y_train = data['y_train']
+    x_val = data['x_val']
+    y_val = data['y_val']
+    x_test = data['x_test']
+    y_test = data['y_test']
 
     """
     Create corresponding datasets.
     """
-    train_dataset = None
-    val_dataset = None
-    test_dataset = None # skip y_test in the test dataset
+    train_dataset = Q3Dataset(x_train, y_train)
+    val_dataset = Q3Dataset(x_val, y_val)
+    test_dataset = Q3Dataset(x_test, y_test)
 
     """
     Create dataloaders for each dataset.
@@ -84,6 +88,7 @@ for seed in seeds_list:
         # TODO: Set your model to training mode.
 
         for batch in tqdm(train_loader, leave=False, desc="Training"):
+            continue
             # TODO: Zero the gradients
             
             # TODO: Unpack the batch. It is a tuple containing x and y.
