@@ -1,0 +1,3 @@
+True parameters: alpha = 2 beta = 0.5
+Estimated parameters: alpha = 2.0088870525360107 beta = 0.44392240047454834
+Prediction error on validation set: 0.97976154088974
