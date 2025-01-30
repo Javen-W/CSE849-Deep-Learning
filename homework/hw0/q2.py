@@ -89,12 +89,16 @@ NOTE: Do not change the values of lr and weight_decay.
 """
 lr = 1e-2
 weight_decay = 1e-4
-optimizer = None
+optimizer = torch.optim.AdamW(
+    lr=lr,
+    weight_decay=weight_decay,
+    params=model.parameters(),
+)
 
 """
 TODO: Set up the loss function as nn.MSELoss.
 """
-loss_fn = None
+loss_fn = nn.MSELoss()
 
 """
 NOTE: Do not change the below values for num_epochs
