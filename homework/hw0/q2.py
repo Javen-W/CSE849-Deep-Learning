@@ -65,7 +65,7 @@ val_loader = DataLoader(
 """
 TODO: Create a simple linear regression model using nn.Linear.
 """
-model = None
+model = nn.Linear(in_features=1, out_features=1)
 
 """
 TODO: Initialize the model after setting PyTorch seed to model_seed. But we
@@ -74,9 +74,10 @@ store the current random state, set the seed to model_seed, initialize
 the model and restore the random state.
 """
 rng = torch.get_rng_state()
-# TODO: set seed here
+torch.manual_seed(model_seed)
 
 # TODO: Sample the values from a normal distribution
+nn.init.xavier_normal_(model.weight)
 torch.set_rng_state(rng)
 
 """
