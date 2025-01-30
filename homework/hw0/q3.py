@@ -82,7 +82,7 @@ for seed in seeds_list:
     """
     Set up the loss function as nn.MSELoss.
     """
-    loss_fn = None
+    loss_fn = nn.MSELoss()
 
     num_epochs = 1000
 
@@ -95,26 +95,44 @@ for seed in seeds_list:
 
     for e in trange(num_epochs):
         # TODO: Set your model to training mode.
+        model.train()
 
         for batch in tqdm(train_loader, leave=False, desc="Training"):
-            continue
             # TODO: Zero the gradients
+            optimizer.zero_grad()
             
             # TODO: Unpack the batch. It is a tuple containing x and y.
+            x, y = batch
 
             # TODO: Pass it through the model to get the predicted y_hat.
+            y_hat = model(x)
 
             # TODO: Calculate the loss using the loss function.
+            loss = loss_fn(y_hat, y)
 
             # TODO: Backpropagate the loss.
+            loss.backward()
 
             # TODO: Update the model weights.
+            optimizer.step()
         
             # TODO: Store the training loss in the list
+            train_step_list.append(step)
+            train_loss_list.append(loss.item())
+            step += 1
         
         # TODO: Evaluate your model on the validation set.
-        # Remember to set the model in evaluation mode and to use
-        # torch.no_grad()
+        # Remember to set the model in evaluation mode and to use torch.no_grad()
+        model.eval()
+        with torch.no_grad():
+            for batch in val_loader:
+                x, y = batch
+                y_hat = model(x)
+                loss = loss_fn(y_hat, y)
+
+                val_step_list.append(step)
+                val_loss_list.append(loss.item())
+                step += 1
 
 # TODO: Run the model on the test set
 with torch.no_grad():
@@ -124,4 +142,6 @@ with open("q3_test_output.txt", "w") as f:
     for yhat in yhat_test:
         f.write(f"{yhat.item()}\n")
 
+
 # TODO: Save the model as q3_model.pt
+# torch.save(model.state_dict(), './results/q3_model.pt')
