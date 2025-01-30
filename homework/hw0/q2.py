@@ -45,8 +45,22 @@ False for the validation dataset.
 """
 
 batch_size = num_samples # Use the entire dataset
-train_loader = None
-val_loader = None
+num_workers = 8
+
+train_loader = DataLoader(
+    train_dataset,
+    batch_size=batch_size,
+    shuffle=True,
+    drop_last=True,
+    num_workers=num_workers,
+)
+val_loader = DataLoader(
+    val_dataset,
+    batch_size=batch_size,
+    shuffle=False,
+    drop_last=False,
+    num_workers=num_workers,
+)
 
 """
 TODO: Create a simple linear regression model using nn.Linear.
