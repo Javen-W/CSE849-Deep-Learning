@@ -4,6 +4,7 @@ from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 from tqdm import tqdm, trange
 from data import Q3Dataset
+from q2 import model_seed
 
 seeds_list = [1, 2, 3, 4, 5]
 # TODO: For each seed, plot the fitted model along with the training
@@ -45,7 +46,14 @@ for seed in seeds_list:
     """
     Create the MLP as described in the PDF
     """
-    model = None
+    model = nn.Sequential(
+        nn.Linear(1, 10),
+        # nn.ReLU(),
+        nn.Linear(10, 10),
+        # nn.ReLU(),
+        nn.Linear(10, 1),
+        # nn.Sigmoid()
+    )
 
     """
     Initialize the model after setting PyTorch seed to model_seed. But we
@@ -55,9 +63,10 @@ for seed in seeds_list:
     """
     rng = torch.get_rng_state()
     # TODO: set seed
+    torch.manual_seed(model_seed)
 
     # TODO: Sample the values from a normal distribution
-
+    nn.init.normal_(model.weight)
     torch.set_rng_state(rng)
 
     """
