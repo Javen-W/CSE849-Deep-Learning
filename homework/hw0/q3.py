@@ -154,7 +154,7 @@ for seed in seeds_list:
     with torch.no_grad():
         predictions = model(x_train.reshape((-1, 1)))
         sorted_indices = torch.argsort(x_train)
-        ax.plot(x_train[sorted_indices], predictions[sorted_indices], label=f'Seed {seed}')
+        ax.plot(x_train[sorted_indices], predictions[sorted_indices], label=f'Seed {seed}', marker='.', linestyle=':')
 
 
 """
@@ -166,7 +166,11 @@ ax.set_ylabel('y')
 ax.grid(True)
 ax.set_title('Data and Fitted Models')
 ax.legend()
-plt.savefig('./results/q3_plot.png')
+
+fig.tight_layout()
+fig.savefig('./results/q3_plot.png', dpi=300)
+plt.clf()
+plt.close(fig)
 
 """
 # TODO: Run the model on the test set
