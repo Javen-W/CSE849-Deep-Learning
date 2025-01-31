@@ -3,7 +3,6 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 from tqdm import tqdm, trange
-
 from data import MyDataset
 
 """

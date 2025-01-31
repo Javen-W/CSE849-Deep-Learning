@@ -49,6 +49,7 @@ class MyDataset(Dataset):
 
 class Q3Dataset(Dataset):
     def __init__(self, x, y):
+        super().__init__()
         self.x = x
         self.y = y
 
@@ -56,4 +57,4 @@ class Q3Dataset(Dataset):
         return len(self.x)
 
     def __getitem__(self, index):
-        self.x[index].reshape((1,)), self.y[index].reshape((1,))
+        return self.x[index].reshape((1,)), self.y[index].reshape((1,))

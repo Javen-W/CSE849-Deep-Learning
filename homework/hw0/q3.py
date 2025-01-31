@@ -1,30 +1,45 @@
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, TensorDataset
 import matplotlib.pyplot as plt
 from tqdm import tqdm, trange
 from data import Q3Dataset
-from q2 import model_seed
+
+
+class MLP(nn.Module):
+    def __init__(self):
+        super(MLP, self).__init__()
+        self.layer1 = nn.Linear(1, 10)
+        self.layer2 = nn.Linear(10, 10)
+        self.layer3 = nn.Linear(10, 1)
+
+    def forward(self, x):
+        x = torch.relu(self.layer1(x))
+        x = torch.relu(self.layer2(x))
+        x = self.layer3(x)
+        return x
+
 
 """
 Load the dataset from zip files
 """
 data = torch.load("HW0_data.pt", weights_only=True)
-print(data.keys())
-x_train = data['x_train']
-y_train = data['y_train']
-x_val = data['x_val']
-y_val = data['y_val']
+x_train, y_train = data['x_train'], data['y_train']
+x_val, y_val = data['x_val'], data['y_val']
 x_test = data['x_test']
-y_test = data['y_test']
-exit(1)
 
 """
 Create corresponding datasets.
 """
 train_dataset = Q3Dataset(x_train, y_train)
 val_dataset = Q3Dataset(x_val, y_val)
-test_dataset = Q3Dataset(x_test, y_test)
+test_dataset = TensorDataset(x_test)
+
+"""
+Set the seed to the last three digits of your student number.
+E.g., if you are student number 160474145, set the seed to 145.
+"""
+model_seed = 989
 
 """
 TODO: For each seed, plot the fitted model along with the training
@@ -50,14 +65,7 @@ for seed in seeds_list:
     """
     Create the MLP as described in the PDF
     """
-    model = nn.Sequential(
-        nn.Linear(1, 10),
-        # nn.ReLU(),
-        nn.Linear(10, 10),
-        # nn.ReLU(),
-        nn.Linear(10, 1),
-        # nn.Sigmoid()
-    )
+    model = MLP()
 
     """
     Initialize the model after setting PyTorch seed to model_seed. But we
@@ -70,7 +78,8 @@ for seed in seeds_list:
     torch.manual_seed(model_seed)
 
     # TODO: Sample the values from a normal distribution
-    nn.init.normal_(model.weight)
+    for param in model.parameters():
+        nn.init.normal_(param)
     torch.set_rng_state(rng)
 
     """
@@ -142,9 +151,10 @@ for seed in seeds_list:
     """
     Visualize the model predictions.
     """
-    predictions = model(x_train)
-    sorted_indices = torch.argsort(x_train)
-    ax.plot(x_train[sorted_indices], predictions[sorted_indices], label=f'Seed {seed}')
+    with torch.no_grad():
+        predictions = model(x_train.reshape((-1, 1)))
+        sorted_indices = torch.argsort(x_train)
+        ax.plot(x_train[sorted_indices], predictions[sorted_indices], label=f'Seed {seed}')
 
 
 """
