@@ -14,8 +14,10 @@ class MLP(nn.Module):
         self.layer3 = nn.Linear(10, 1)
 
     def forward(self, x):
-        x = torch.relu(self.layer1(x))
-        x = torch.relu(self.layer2(x))
+        x = self.layer1(x)
+        # x = torch.relu(x)
+        x = self.layer2(x)
+        # x = torch.relu(x)
         x = self.layer3(x)
         return x
 
@@ -36,31 +38,31 @@ val_dataset = Q3Dataset(x_val, y_val)
 test_dataset = TensorDataset(x_test)
 
 """
+Set the seed to the last five digits of your student number.
+E.g., if you are student number 160474145, set the seed to 74145.
+"""
+overall_seed = 59989
+
+"""
 Set the seed to the last three digits of your student number.
 E.g., if you are student number 160474145, set the seed to 145.
 """
 model_seed = 989
 
-"""
-TODO: For each seed, plot the fitted model along with the training
-data points. The data samples need to be plotted only once. Follow the
-instructions from q2.py on how to plot the results.
-"""
-seeds_list = [1, 2, 3, 4, 5]
-fig, ax = plt.subplots()
-for seed in seeds_list:
-    torch.manual_seed(seed)
+
+def train_model(_seed, batch_size, lr):
+    """
+    Initializes, trains, and plots a model for the given parameters.
+    """
+    # global seed
+    torch.manual_seed(_seed)
 
     """
     Create dataloaders for each dataset.
     """
-    batch_size = 2000 # Use the entire dataset
-    train_loader = DataLoader(train_dataset, batch_size=batch_size,
-                            shuffle=True, drop_last=True)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size,
-                            shuffle=False, drop_last=False)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size,
-                             shuffle=False, drop_last=False)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, drop_last=False)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, drop_last=False)
 
     """
     Create the MLP as described in the PDF
@@ -87,10 +89,12 @@ for seed in seeds_list:
     weight_decay. Check the usage of the optimizer in the PyTorch documentation.
     Make sure to pass the parameters of model to the optimizer.
     """
-    lr = 1e-2
     weight_decay = 1e-4
-    optimizer = torch.optim.AdamW(model.parameters(), lr=lr,
-                                  weight_decay=weight_decay)
+    optimizer = torch.optim.AdamW(
+        model.parameters(),
+        lr=lr,
+        weight_decay=weight_decay
+    )
 
     """
     Set up the loss function as nn.MSELoss.
@@ -158,19 +162,32 @@ for seed in seeds_list:
 
 
 """
-Complete the model prediction visualization.
+TODO: For each seed, plot the fitted model along with the training
+data points. The data samples need to be plotted only once. Follow the
+instructions from q2.py on how to plot the results.
 """
+seeds_list = [1, 2, 3, 4, 5]
+fig, ax = plt.subplots()
+for seed in seeds_list:
+    train_model(seed, batch_size=2000, lr=1e-2)
+
+# Complete the model prediction visualization.
 ax.scatter(x_train, y_train, label='Training Data', c="blue", marker=".")
 ax.set_xlabel('x')
 ax.set_ylabel('y')
 ax.grid(True)
 ax.set_title('Data and Fitted Models')
 ax.legend()
-
 fig.tight_layout()
 fig.savefig('./results/q3_plot.png', dpi=300)
 plt.clf()
 plt.close(fig)
+
+"""
+Tune the model hyperparameters (batch_size, learning_rate).
+"""
+batch_list = [16, 32, 64]
+lr_list = [0.001, 0.01, 0.1]
 
 """
 # TODO: Run the model on the test set
