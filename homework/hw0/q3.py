@@ -105,13 +105,6 @@ def train_model(_seed, batch_size, lr):
     Train the model.
     """
     num_epochs = 1000
-    train_step_list = []
-    train_loss_list = []
-    val_step_list = []
-    val_loss_list = []
-    w_list = []
-    step = 0
-
     for _ in tqdm(range(num_epochs)):
         # TODO: Set your model to training mode.
         model.train()
@@ -134,23 +127,17 @@ def train_model(_seed, batch_size, lr):
             # TODO: Update the model weights.
             optimizer.step()
         
-            # TODO: Store the training loss in the list
-            train_step_list.append(step)
-            train_loss_list.append(loss.item())
-            step += 1
-        
-        # TODO: Evaluate your model on the validation set.
-        # Remember to set the model in evaluation mode and to use torch.no_grad()
-        model.eval()
-        with torch.no_grad():
-            for batch in val_loader:
-                x, y = batch
-                y_hat = model(x)
-                loss = loss_fn(y_hat, y)
-
-                val_step_list.append(step)
-                val_loss_list.append(loss.item())
-                step += 1
+    # TODO: Evaluate your model on the validation set.
+    # Remember to set the model in evaluation mode and to use torch.no_grad()
+    val_loss = 0.0
+    model.eval()
+    with torch.no_grad():
+        for batch in val_loader:
+            x, y = batch
+            y_hat = model(x)
+            loss = loss_fn(y_hat, y)
+            val_loss += loss.item() * x.size(0)
+    val_loss /= len(val_dataset)
 
     """
     Visualize the model predictions.
@@ -160,6 +147,10 @@ def train_model(_seed, batch_size, lr):
         sorted_indices = torch.argsort(x_train)
         ax.plot(x_train[sorted_indices], predictions[sorted_indices], label=f'Seed {seed}', marker='.', linestyle=':')
 
+    """
+    Return model and validation error.
+    """
+    return model, val_loss
 
 """
 TODO: For each seed, plot the fitted model along with the training
@@ -186,18 +177,28 @@ plt.close(fig)
 """
 Tune the model hyperparameters (batch_size, learning_rate).
 """
-batch_list = [16, 32, 64]
-lr_list = [0.001, 0.01, 0.1]
+best_loss = float('inf')
+best_model = None
+batch_list = [16, 32, 64, 2000]
+lr_list = [0.001, 0.01, 0.1, 1e-2]
+for batch_size in batch_list:
+    for lr in lr_list:
+        model, val_loss = train_model(
+            _seed=overall_seed,
+            batch_size=batch_size,
+            lr=lr,
+        )
+        if val_loss < best_loss:
+            best_model = model
 
-"""
+
 # TODO: Run the model on the test set
 with torch.no_grad():
-    yhat_test = model(x_test).numpy()
+    yhat_test = best_model(x_test).numpy()
 
 with open('./results/q3_test_output.txt', "w") as f:
     for yhat in yhat_test:
         f.write(f"{yhat.item()}\n")
 
 # TODO: Save the model as q3_model.pt
-torch.save(model.state_dict(), './results/q3_model.pt')
-"""
+torch.save(best_model.state_dict(), './results/q3_model.pt')
