@@ -190,11 +190,13 @@ for batch_size in batch_list:
         )
         if val_loss < best_loss:
             best_model = model
+            best_loss = val_loss
+            print(f"Best params: loss={val_loss}, batch_size={batch_size}, lr={lr}")
 
 
 # TODO: Run the model on the test set
 with torch.no_grad():
-    yhat_test = best_model(x_test).numpy()
+    yhat_test = best_model(x_test.reshape((-1, 1))).numpy()
 
 with open('./results/q3_test_output.txt', "w") as f:
     for yhat in yhat_test:
