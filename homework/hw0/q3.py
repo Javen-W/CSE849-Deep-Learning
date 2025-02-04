@@ -15,9 +15,9 @@ class MLP(nn.Module):
 
     def forward(self, x):
         x = self.layer1(x)
-        # x = torch.relu(x)
+        x = torch.relu(x)
         x = self.layer2(x)
-        # x = torch.relu(x)
+        x = torch.relu(x)
         x = self.layer3(x)
         return x
 
