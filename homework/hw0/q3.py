@@ -55,7 +55,7 @@ def train_model(_seed, batch_size, lr):
     Initializes, trains, and plots a model for the given parameters.
     """
     # global seed
-    torch.manual_seed(_seed)
+    torch.manual_seed(overall_seed)
 
     """
     Create dataloaders for each dataset.
@@ -77,7 +77,7 @@ def train_model(_seed, batch_size, lr):
     """
     rng = torch.get_rng_state()
     # TODO: set seed
-    torch.manual_seed(model_seed)
+    torch.manual_seed(_seed)
 
     # TODO: Sample the values from a normal distribution
     for param in model.parameters():
@@ -183,15 +183,17 @@ batch_list = [16, 32, 64, 2000]
 lr_list = [0.001, 0.01, 0.1, 1e-2]
 for batch_size in batch_list:
     for lr in lr_list:
-        model, val_loss = train_model(
-            _seed=overall_seed,
-            batch_size=batch_size,
-            lr=lr,
-        )
-        if val_loss < best_loss:
-            best_model = model
-            best_loss = val_loss
-            print(f"Best params: loss={val_loss}, batch_size={batch_size}, lr={lr}")
+        for seed in seeds_list:
+            model, val_loss = train_model(
+                _seed=seed,
+                batch_size=batch_size,
+                lr=lr,
+            )
+            print(f"Training params: loss={val_loss}, batch_size={batch_size}, lr={lr}, seed={seed}")
+            if val_loss < best_loss:
+                best_model = model
+                best_loss = val_loss
+                print(f"Best params: loss={val_loss}, batch_size={batch_size}, lr={lr}, seed={seed}")
 
 
 # TODO: Run the model on the test set
