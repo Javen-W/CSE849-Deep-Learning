@@ -2,23 +2,25 @@ import torch
 import matplotlib.pyplot as plt
 import os
 import math
+import numpy as np
 from tqdm import tqdm
 
 
 def theta(x1, x2):
     # Calculate theta as provided in the question
-    return math.atan(x2 / x1)
+    return torch.atan2(x2, x1)
 
 def r(x1, x2):
     # Calculate r as provided in the question
-    return math.sqrt(math.pow(x1, 2) + math.pow(x2, 2))
+    return torch.sqrt(x1 ** 2 + x2 ** 2)
 
 def y(x1, x2):
     # First calculate r and theta using the functions defined above and
     # then calculate y as provided in the question.
     _r = r(x1, x2)
     _theta = theta(x1, x2)
-    return math.pow(_r, 2) * (math.pow(math.sin(6 * _theta + 2 * _r), 2) + 1)
+    _y = _r ** 2 * (torch.sin(6 * _theta + 2 * _r) ** 2 + 1)
+    return _y
 
 def grad_theta_x1(x1, x2):
     # Calculate the gradient of theta w.r.t. x1
@@ -82,8 +84,8 @@ for lam_idx, lam in enumerate(lams_list):
 
         # Find random starting points for x1 and x2 between [-5, 5] x
         # [-5, 5] using torch.rand
-        x1 = torch.randint(low=-5, high=5, size=[1])
-        x2 = torch.randint(low=-5, high=5, size=[1])
+        x1 = np.random.uniform(-5, 5)
+        x2 = np.random.uniform(-5, 5)
 
         # Store the values for plotting
         y_vals = []
