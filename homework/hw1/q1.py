@@ -79,8 +79,8 @@ for lam_idx, lam in enumerate(lams_list):
 
         # Find random starting points for x1 and x2 between [-5, 5] x
         # [-5, 5] using torch.rand
-        x1 = None
-        x2 = None
+        x1 = torch.randint(low=-5, high=5, size=[1])
+        x2 = torch.randint(low=-5, high=5, size=[1])
 
         # Store the values for plotting
         y_vals = []
