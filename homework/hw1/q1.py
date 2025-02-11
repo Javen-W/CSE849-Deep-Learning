@@ -1,21 +1,24 @@
 import torch
 import matplotlib.pyplot as plt
 import os
+import math
 from tqdm import tqdm
 
 
 def theta(x1, x2):
     # Calculate theta as provided in the question
-    pass
+    return math.atan(x2 / x1)
 
 def r(x1, x2):
     # Calculate r as provided in the question
-    pass    
+    return math.sqrt(math.pow(x1, 2) + math.pow(x2, 2))
 
 def y(x1, x2):
     # First calculate r and theta using the functions defined above and
     # then calculate y as provided in the question.
-    pass
+    _r = r(x1, x2)
+    _theta = theta(x1, x2)
+    return math.pow(_r, 2) * (math.pow(math.sin(6 * _theta + 2 * _r), 2) + 1)
 
 def grad_theta_x1(x1, x2):
     # Calculate the gradient of theta w.r.t. x1
