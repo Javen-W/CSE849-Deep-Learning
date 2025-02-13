@@ -24,27 +24,27 @@ def y(x1, x2):
 
 def grad_theta_x1(x1, x2):
     # Calculate the gradient of theta w.r.t. x1
-    pass
+    return -x2 / (r(x1, x2) ** 2)
 
 def grad_theta_x2(x1, x2):
     # Calculate the gradient of theta w.r.t. x2
-    pass
+    return -x1 / (r(x1, x2) ** 2)
 
 def grad_r_x1(x1, x2):
     # Calculate the gradient of r w.r.t. x1
-    pass
+    x1 / r(x1, x2)
 
 def grad_r_x2(x1, x2):
     # Calculate the gradient of r w.r.t. x2
-    pass
+    x2 / r(x1, x2)
 
 def grad_y_theta(rval, thetaval):
     # Calculate the gradient of y w.r.t. theta
-    pass
+    return 12 * (rval ** 2) * torch.sin(6 * thetaval + 2 * rval) * torch.cos(6 * thetaval + 2 * rval)
 
 def grad_y_r(rval, thetaval):
     # Calculate the gradient of y w.r.t. r
-    pass
+    return (4 * (rval ** 2) * torch.sin(6 * thetaval + 2 * rval) * torch.cos(6 * thetaval + 2 * rval)) + (2 * rval * (torch.sin(6 * thetaval + 2 * rval) ** 2 + 1))
 
 def grad_y_x1(x1, x2):
     # Calculate the gradient of y w.r.t. x1. First
@@ -52,7 +52,9 @@ def grad_y_x1(x1, x2):
     # functions defined above. Then calculate the gradients of theta and
     # r w.r.t. x1 using the functions defined above. Finally, use the
     # chain rule to calculate the gradient of y w.r.t. x1.
-    pass
+    _r = r(x1, x2)
+    _theta = theta(x1, x2)
+    return (grad_y_r(_r, _theta) * grad_r_x1(x1, x2)) + (grad_y_theta(_r, _theta) * grad_theta_x1(x1, x2))
 
 def grad_y_x2(x1, x2):
     # Calculate the gradient of y w.r.t. x2. First
@@ -60,7 +62,9 @@ def grad_y_x2(x1, x2):
     # functions defined above. Then calculate the gradients of theta and
     # r w.r.t. x2 using the functions defined above. Finally, use the
     # chain rule to calculate the gradient of y w.r.t. x2.
-    pass
+    _r = r(x1, x2)
+    _theta = theta(x1, x2)
+    return (grad_y_r(_r, _theta) * grad_r_x2(x1, x2)) + (grad_y_theta(_r, _theta) * grad_theta_x2(x1, x2))
 
 
 
