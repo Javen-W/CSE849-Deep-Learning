@@ -45,8 +45,10 @@ class MLP:
 
 
 lr = 1e-2
-mlp = MLP(2, 100, lr=lr)
+batch_size = 64
+num_epochs = 100
 
+mlp = MLP(2, 100, lr=lr)
 mse = MSE()
 mse.train()
 
@@ -56,10 +58,9 @@ data = torch.load("Project1_data.pt", map_location="cpu",
 train_dataset = TensorDataset(data["x_train"], data["y_train"].reshape(-1, 1))
 val_dataset = TensorDataset(data["x_val"], data["y_val"].reshape(-1, 1))
 
-train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-val_dataloader = DataLoader(val_dataset, batch_size=32, shuffle=False)
+train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
-num_epochs = 100
 
 step = 0
 train_step_count = []
@@ -106,5 +107,8 @@ with open("q2_ytest.txt", "w") as f:
 plt.plot(train_step_count, train_loss_list)
 plt.plot(val_step_count, val_loss_list)
 plt.yscale("log")
-# plt.show()
+plt.suptitle("Q2 Training vs. Validation Loss")
+plt.grid(True)
+plt.xlabel("Step")
+plt.ylabel("Loss")
 plt.savefig(f"plots/q2.png", dpi=300)
