@@ -66,8 +66,10 @@ class Linear(BaseUnit):
             grad_b += grad.sum(dim=0)
         
         # Average the gradients over the batch dimension
-        grad_W = grad_W.mean(dim=0)
-        grad_b = grad_b.mean(dim=0)
+        # grad_W = grad_W.mean(dim=0)
+        # grad_b = grad_b.mean(dim=0)
+        grad_W /= n
+        grad_b /= n
 
         # Return the grad for the previous layer
         grad_for_next = grad @ self.W.T
@@ -103,21 +105,25 @@ class ReLU(BaseUnit):
 class MSE(BaseUnit):
     def __init__(self, lr=None):
         super().__init__(lr)
-        self.grad_return = None
+        self.yhat = None
+        self.y = None
+        self.n = None
 
     def forward(self, yhat, y):
-        n = yhat.shape[0]  # batch size
         if not self.eval_mode:
             # store the parts required for the backward pass
-            # d(MSE)/d(yhat) = (2/n) * (yhat - y)
-            self.grad_return = (2 / n) * (yhat - y)
+            self.yhat = yhat
+            self.y = y
+            self.n = yhat.shape[0]
         
         # Calculate the mean squared error
-        error = torch.mean((yhat - y) ** 2) * (1 / n)
+        error = torch.mean((yhat - y) ** 2) # * (1 / n)
         return error
 
     def backward(self, grad=None):
         # There is no gradient for MSE since there are no parameters.
         # Return the gradient for the previous layer
-        grad_for_next = self.grad_return
+        # d(MSE)/d(yhat) = (2/n) * (yhat - y)
+        grad_for_next = (2 / self.n) * (self.yhat - self.y)
+
         return grad_for_next

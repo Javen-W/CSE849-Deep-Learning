@@ -44,9 +44,12 @@ class MLP:
         self.lin3.eval()
 
 
-lr = 1e-2
-batch_size = 64
+lr = 0.01
+batch_size = 128
 num_epochs = 100
+seed = 777
+
+torch.manual_seed(seed)
 
 mlp = MLP(2, 100, lr=lr)
 mse = MSE()
