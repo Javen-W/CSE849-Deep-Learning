@@ -66,15 +66,15 @@ class Linear(BaseUnit):
             grad_b += grad.sum(dim=0)
         
         # Average the gradients over the batch dimension
-        grad_W = grad_W.mean(0)
-        grad_b = grad_b.mean(0)
+        grad_W = grad_W.mean(dim=0)
+        grad_b = grad_b.mean(dim=0)
+
+        # Return the grad for the previous layer
+        grad_for_next = grad @ self.W.T
 
         # Update the parameters using the gradients
         self.W -= self.lr * grad_W
         self.b -= self.lr * grad_b
-
-        # Return the grad for the previous layer
-        grad_for_next = grad @ self.W.T
 
         return grad_for_next
 
