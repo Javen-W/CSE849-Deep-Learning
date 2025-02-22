@@ -86,16 +86,17 @@ class ReLU(BaseUnit):
     def forward(self, X):
         if not self.eval_mode:
             # store the information required for the backward pass
-            pass
+            self.sign = (X > 0).float()
         
         # Compute the ReLU activation
-        out = None
+        out = torch.max(X, torch.zeros_like(X))
         return out
 
     def backward(self, grad):
         # There is no gradient for ReLU since there are no parameters.
         # However, you must compute the gradient for the previous layer
-        grad_for_next = None
+        # d(ReLU)/dx = 1 if x > 0, 0 otherwise
+        grad_for_next = grad * self.sign
 
         return grad_for_next
 
