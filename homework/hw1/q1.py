@@ -32,11 +32,11 @@ def grad_theta_x2(x1, x2):
 
 def grad_r_x1(x1, x2):
     # Calculate the gradient of r w.r.t. x1
-    x1 / r(x1, x2)
+    return x1 / r(x1, x2)
 
 def grad_r_x2(x1, x2):
     # Calculate the gradient of r w.r.t. x2
-    x2 / r(x1, x2)
+    return x2 / r(x1, x2)
 
 def grad_y_theta(rval, thetaval):
     # Calculate the gradient of y w.r.t. theta
@@ -88,8 +88,8 @@ for lam_idx, lam in enumerate(lams_list):
 
         # Find random starting points for x1 and x2 between [-5, 5] x
         # [-5, 5] using torch.rand
-        x1 = np.random.uniform(-5, 5)
-        x2 = np.random.uniform(-5, 5)
+        x1 = torch.tensor(np.random.uniform(-5, 5), requires_grad=False)
+        x2 = torch.tensor(np.random.uniform(-5, 5), requires_grad=False)
 
         # Store the values for plotting
         y_vals = []
@@ -98,7 +98,7 @@ for lam_idx, lam in enumerate(lams_list):
 
         for step in range(num_steps):
             # Calculate the value of y
-            yval = None
+            yval = y(x1, x2)
 
             # Store the value
             y_vals.append(yval)
@@ -108,6 +108,8 @@ for lam_idx, lam in enumerate(lams_list):
             x2_grad = grad_y_x2(x1, x2)
 
             # Write the update equation for x1 and x2
+            x1 -= lam * x1_grad
+            x2 -= lam * x2_grad
 
             # Store the updated values for plotting
             x1_vals.append(x1.item())
