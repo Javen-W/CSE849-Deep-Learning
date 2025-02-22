@@ -108,16 +108,16 @@ class MSE(BaseUnit):
     def forward(self, yhat, y):
         if not self.eval_mode:
             # store the parts required for the backward pass
-            pass
+            n = yhat.shape[0]  # batch size
+            # d(MSE)/d(yhat) = (2/n) * (yhat - y)
+            self.grad_return = (2 / n) * (yhat - y)
         
         # Calculate the mean squared error
-        error = None
+        error = torch.mean((yhat - y) ** 2)
         return error
 
     def backward(self, grad=None):
         # There is no gradient for MSE since there are no parameters.
         # Return the gradient for the previous layer
-        
-        grad_for_next = None
-        
+        grad_for_next = self.grad_return
         return grad_for_next
