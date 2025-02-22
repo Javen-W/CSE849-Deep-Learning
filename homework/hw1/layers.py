@@ -106,14 +106,14 @@ class MSE(BaseUnit):
         self.grad_return = None
 
     def forward(self, yhat, y):
+        n = yhat.shape[0]  # batch size
         if not self.eval_mode:
             # store the parts required for the backward pass
-            n = yhat.shape[0]  # batch size
             # d(MSE)/d(yhat) = (2/n) * (yhat - y)
             self.grad_return = (2 / n) * (yhat - y)
         
         # Calculate the mean squared error
-        error = torch.mean((yhat - y) ** 2)
+        error = torch.mean((yhat - y) ** 2) * (1 / n)
         return error
 
     def backward(self, grad=None):
