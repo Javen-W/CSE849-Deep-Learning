@@ -106,4 +106,5 @@ with open("q2_ytest.txt", "w") as f:
 plt.plot(train_step_count, train_loss_list)
 plt.plot(val_step_count, val_loss_list)
 plt.yscale("log")
-plt.show()
+# plt.show()
+plt.savefig(f"plots/q2.png", dpi=300)
