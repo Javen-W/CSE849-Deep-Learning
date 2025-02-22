@@ -2,8 +2,7 @@ import torch
 from tqdm import tqdm, trange
 from torch.utils.data import DataLoader, TensorDataset
 import matplotlib.pyplot as plt
-
-from layers_solution import Linear, ReLU, MSE
+from layers import Linear, ReLU, MSE
 
 class MLP:
     def __init__(self, d_x, d_h, lr):
@@ -51,7 +50,7 @@ mlp = MLP(2, 100, lr=lr)
 mse = MSE()
 mse.train()
 
-data = torch.load("HW1_data.pt", map_location="cpu",
+data = torch.load("Project1_data.pt", map_location="cpu",
                   weights_only=True)
 
 train_dataset = TensorDataset(data["x_train"], data["y_train"].reshape(-1, 1))

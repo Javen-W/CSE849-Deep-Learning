@@ -26,9 +26,9 @@ class Linear(BaseUnit):
         # create the parameter W and initialize it from a normal
         # distribution with mean 0 and std 0.05. Check torch.randn
         # for this.
-        self.W = None
+        self.W = torch.randn(size=(d_in, d_out)) * 0.05
         # create the parameter b and initialize it to zeros
-        self.b = None
+        self.b = torch.zeros(size=(d_out, ))
         self.d_in = d_in
         self.d_out = d_out
         # self.grad_comps for each parameter
@@ -40,15 +40,15 @@ class Linear(BaseUnit):
         n = X.shape[0]
         # calculate out = X @ W + b. Remember to reshape b so that it
         # adds elementwise to each row.
-        out = None
+        out = X @ self.W + self.b.reshape(1, -1)
 
         if not self.eval_mode:
             # You are in training mode.
             # Compute self.h_W = d(out)/d(W) and self.h_b = d(out)/d(b).
             # Remember to preserve the batch dimension as it is
             # collapsed only during the final gradient computation
-            if self.h_W is None:
-                pass
+            self.h_W = X
+            self.h_b = torch.ones(n, 1)
 
         return out
 
@@ -56,22 +56,25 @@ class Linear(BaseUnit):
         # grad is of shape n x d_out
         n = grad.shape[0]
         # Create placeholders for the gradients of W and b
-        grad_W = None
-        grad_b = None
+        grad_W = torch.zeros(self.d_in, self.d_out)
+        grad_b = torch.zeros(self.d_out)
 
         # Calculate the gradients for W and b. Use a for loop in the
         # beginning to ensure the correctness of your implementation
-        pass
+        for i in range(n):
+            grad_W += torch.outer(self.h_W[i], grad[i])
+            grad_b += grad.sum(dim=0)
         
         # Average the gradients over the batch dimension
         grad_W = grad_W.mean(0)
         grad_b = grad_b.mean(0)
 
         # Update the parameters using the gradients
-        pass
+        self.W -= self.lr * grad_W
+        self.b -= self.lr * grad_b
 
         # Return the grad for the previous layer
-        grad_for_next = None
+        grad_for_next = grad @ self.W.T
 
         return grad_for_next
 
