@@ -28,7 +28,7 @@ def grad_theta_x1(x1, x2):
 
 def grad_theta_x2(x1, x2):
     # Calculate the gradient of theta w.r.t. x2
-    return -x1 / (r(x1, x2) ** 2)
+    return x1 / (r(x1, x2) ** 2)
 
 def grad_r_x1(x1, x2):
     # Calculate the gradient of r w.r.t. x1
