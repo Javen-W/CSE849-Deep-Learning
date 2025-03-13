@@ -44,7 +44,7 @@ class CNN(nn.Module):
         x = self.maxpool(self.relu(self.bn4(conv4_out)))
 
         conv5_out = self.conv5(x)
-        x = self.fc(self.avgpool(conv5_out))
+        x = self.fc(torch.squeeze(self.avgpool(conv5_out)))
 
         final_out = x
 
