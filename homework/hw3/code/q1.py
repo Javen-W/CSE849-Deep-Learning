@@ -12,6 +12,7 @@ torch.manual_seed(123)
 from data import create_dataloaders, NORMAL_MEAN, NORMAL_STD, DATASET_ROOT
 from model import CNN
 
+skip_training = False
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Get your dataloaders
@@ -59,116 +60,118 @@ val_step_list = []
 val_loss_list = []
 val_accuracy_list = []
 
-for epoch in range(num_epochs):
-    model.train()
-    for i, (images, labels) in enumerate(train_loader):
-        # TODO: Move images and labels to device
-        images.to(device)
-        labels.to(device)
+if not skip_training:
+    for epoch in range(num_epochs):
+        model.train()
+        for i, (images, labels) in enumerate(train_loader):
+            # TODO: Move images and labels to device
+            images.to(device)
+            labels.to(device)
 
-        # TODO: Zero the gradients
-        optimizer.zero_grad()
+            # TODO: Zero the gradients
+            optimizer.zero_grad()
 
-        # TODO: Forward pass through the model
-        outputs = model(images)
-
-        # TODO: Calculate the loss
-        loss = loss_fn(outputs, labels)
-
-        # TODO: Backward pass
-        loss.backward()
-
-        # TODO: Update weights
-        optimizer.step()
-
-        train_loss_list.append(loss.item())
-        train_step_list.append(step)
-        step += 1
-        if (i + 1) % 100 == 0:
-            print(f"Epoch [{epoch + 1}/{num_epochs}], Step [{i + 1}/{len(train_loader)}], Loss: {loss.item():.4f}")
-
-    scheduler.step()
-    
-    model.eval()
-    with torch.no_grad():
-        # Compute validation loss and accuracy
-        correct, total = 0, 0
-        avg_loss = 0.
-        for images, labels in val_loader:
-            # TODO: Forward pass similar to training
+            # TODO: Forward pass through the model
             outputs = model(images)
+
+            # TODO: Calculate the loss
             loss = loss_fn(outputs, labels)
 
-            avg_loss += loss.item() * labels.size(0)
-            # TODO: Get the predicted labels from the model's outputs
-            predicted = torch.argmax(outputs)
+            # TODO: Backward pass
+            loss.backward()
 
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
-        
-        val_accuracy = correct / total * 100
-        avg_loss /= total
+            # TODO: Update weights
+            optimizer.step()
 
-        # Similarly compute training accuracy. This training accuracy is
-        # not fully reliable as the image transformations are different
-        # from the validation transformations. But it will inform you of
-        # potential issues.
-        correct, total = 0, 0
-        for images, labels in train_loader:
-            # TODO: Forward pass similar to training
-            outputs = model(images)
-            loss = loss_fn(outputs, labels)
+            train_loss_list.append(loss.item())
+            train_step_list.append(step)
+            step += 1
+            if (i + 1) % 100 == 0:
+                print(f"Epoch [{epoch + 1}/{num_epochs}], Step [{i + 1}/{len(train_loader)}], Loss: {loss.item():.4f}")
 
-            avg_loss += loss.item() * labels.size(0)
-            # TODO: Get the predicted labels from the model's outputs
-            predicted = torch.argmax(outputs)
+        scheduler.step()
 
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
+        model.eval()
+        with torch.no_grad():
+            # Compute validation loss and accuracy
+            correct, total = 0, 0
+            avg_loss = 0.
+            for images, labels in val_loader:
+                # TODO: Forward pass similar to training
+                images.to(device)
+                labels.to(device)
+                outputs = model(images)
 
-        train_accuracy = correct / total * 100
+                loss = loss_fn(outputs, labels)
+                avg_loss += loss.item() * labels.size(0)
 
-        val_loss_list.append(avg_loss)
-        val_accuracy_list.append(val_accuracy)
-        train_accuracy_list.append(train_accuracy)
-        val_step_list.append(step)
+                # TODO: Get the predicted labels from the model's outputs
+                predicted = torch.argmax(outputs)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
 
-        print(f"Epoch [{epoch + 1}/{num_epochs}], Val acc: {val_accuracy:.2f}%,",
-              f"Train acc: {train_accuracy:.2f}%")
-        
-        # Optionally, you can save only your best model so far by
-        # keeping track of best validation accuracies.
-        torch.save(model.state_dict(), "results/q1_model.pt")
+            val_accuracy = correct / total * 100
+            avg_loss /= total
 
-        fig, axs = plt.subplots(2, 1, figsize=(10, 10))
-        axs[0].plot(train_step_list, train_loss_list, label="Train")
-        axs[0].plot(val_step_list, val_loss_list, label="Val")
-        axs[0].set_yscale("log")
+            # Similarly compute training accuracy. This training accuracy is
+            # not fully reliable as the image transformations are different
+            # from the validation transformations. But it will inform you of
+            # potential issues.
+            correct, total = 0, 0
+            for images, labels in train_loader:
+                # TODO: Forward pass similar to training
+                images.to(device)
+                labels.to(device)
+                outputs = model(images)
 
-        axs[1].plot(val_step_list, train_accuracy_list, label="Train")
-        axs[1].plot(val_step_list, val_accuracy_list, label="Val")
+                # TODO: Get the predicted labels from the model's outputs
+                predicted = torch.argmax(outputs)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
 
-        axs[0].set_title("Loss")
-        axs[1].set_title("Accuracy")
+            train_accuracy = correct / total * 100
 
-        for ax in axs:
-            ax.legend()
-            ax.grid()
-            ax.set_xlabel("Step")
-            ax.set_ylabel("Value")
+            val_loss_list.append(avg_loss)
+            val_accuracy_list.append(val_accuracy)
+            train_accuracy_list.append(train_accuracy)
+            val_step_list.append(step)
 
-        plt.tight_layout()
-        plt.savefig(f"results/q1_plots.png", dpi=300)
-        plt.clf()
-        plt.close()
+            print(f"Epoch [{epoch + 1}/{num_epochs}], Val acc: {val_accuracy:.2f}%,",
+                  f"Train acc: {train_accuracy:.2f}%")
 
-torch.save(model.state_dict(), "results/q1_model.pt")
+            # Optionally, you can save only your best model so far by
+            # keeping track of best validation accuracies.
+            torch.save(model.state_dict(), "results/q1_model.pt")
+
+            fig, axs = plt.subplots(2, 1, figsize=(10, 10))
+            axs[0].plot(train_step_list, train_loss_list, label="Train")
+            axs[0].plot(val_step_list, val_loss_list, label="Val")
+            axs[0].set_yscale("log")
+
+            axs[1].plot(val_step_list, train_accuracy_list, label="Train")
+            axs[1].plot(val_step_list, val_accuracy_list, label="Val")
+
+            axs[0].set_title("Loss")
+            axs[1].set_title("Accuracy")
+
+            for ax in axs:
+                ax.legend()
+                ax.grid()
+                ax.set_xlabel("Step")
+                ax.set_ylabel("Value")
+
+            plt.tight_layout()
+            plt.savefig(f"results/q1_plots.png", dpi=300)
+            plt.clf()
+            plt.close()
+
+    torch.save(model.state_dict(), "results/q1_model.pt")
 
 # You can copy-paste the following code to another program to evaluate
 # your model separately.
 model.load_state_dict(torch.load("results/q1_model.pt", weights_only=True))
 model.eval()
-test_images = sorted(glob(os.path.join(DATASET_ROOT, "/test_unlabeled/*.png")))
+test_images = sorted(glob(os.path.join(DATASET_ROOT, "test_unlabeled/*.png")))
 
 # TODO: Create test-time image transformations. Same as what you used
 # for validation.
