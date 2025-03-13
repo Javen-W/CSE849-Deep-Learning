@@ -7,10 +7,9 @@ from PIL import Image
 from torchvision.transforms import v2
 import sys
 
-
 torch.manual_seed(123)
 
-from data import create_dataloaders
+from data import create_dataloaders, NORMAL_MEAN, NORMAL_STD, DATASET_ROOT
 from model import CNN
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -169,11 +168,15 @@ torch.save(model.state_dict(), "results/q1_model.pt")
 # your model separately.
 model.load_state_dict(torch.load("results/q1_model.pt", weights_only=True))
 model.eval()
-test_images = sorted(glob("custom_image_dataset/test_unlabeled/*.png"))
+test_images = sorted(glob(os.path.join(DATASET_ROOT, "/test_unlabeled/*.png")))
 
 # TODO: Create test-time image transformations. Same as what you used
 # for validation.
-test_tf = None
+test_tf = v2.Compose([
+    v2.PILToTensor(),
+    v2.ToDtype(torch.float32, scale=True),
+    v2.Normalize(mean=NORMAL_MEAN, std=NORMAL_STD),
+])
 
 test_write = open("results/q1_test.txt", "w")
 # We will run through each image and write the predictions to a file.
@@ -184,7 +187,8 @@ for imgfile in test_images:
     img = test_tf(img)
     img = img.unsqueeze(0).to(device)
     # TODO: Forward pass through the model and get the predicted label
-    predicted = None
+    output = model(img)
+    predicted = torch.argmax(output)
     # predicted is a PyTorch tensor containing the predicted label as a
     # single value between 0 and 9 (inclusive)
     test_write.write(f"{filename},{predicted.item()}\n")
