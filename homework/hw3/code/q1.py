@@ -106,7 +106,7 @@ for epoch in range(num_epochs):
         
         # Optionally, you can save only your best model so far by
         # keeping track of best validation accuracies.
-        torch.save(model.state_dict(), "q1_model.pt")
+        torch.save(model.state_dict(), "results/q1_model.pt")
 
         fig, axs = plt.subplots(2, 1, figsize=(10, 10))
         axs[0].plot(train_step_list, train_loss_list, label="Train")
@@ -126,15 +126,15 @@ for epoch in range(num_epochs):
             ax.set_ylabel("Value")
 
         plt.tight_layout()
-        plt.savefig(f"q1_plots.png", dpi=300)
+        plt.savefig(f"results/q1_plots.png", dpi=300)
         plt.clf()
         plt.close()
 
-torch.save(model.state_dict(), "q1_model.pt")
+torch.save(model.state_dict(), "results/q1_model.pt")
 
 # You can copy-paste the following code to another program to evaluate
 # your model separately.
-model.load_state_dict(torch.load("q1_model.pt", weights_only=True))
+model.load_state_dict(torch.load("results/q1_model.pt", weights_only=True))
 model.eval()
 test_images = sorted(glob("custom_image_dataset/test_unlabeled/*.png"))
 
@@ -142,7 +142,7 @@ test_images = sorted(glob("custom_image_dataset/test_unlabeled/*.png"))
 # for validation.
 test_tf = None
 
-test_write = open("q1_test.txt", "w")
+test_write = open("results/q1_test.txt", "w")
 # We will run through each image and write the predictions to a file.
 # You may also write a custom Dataset class to load it more efficiently.
 for imgfile in test_images:

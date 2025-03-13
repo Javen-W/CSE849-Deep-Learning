@@ -9,7 +9,7 @@ model = CNN()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # load the weights
-model.load_state_dict(torch.load("q1_model.pt", weights_only=True))
+model.load_state_dict(torch.load("results/q1_model.pt", weights_only=True))
 
 model.eval()
 
