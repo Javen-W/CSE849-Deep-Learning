@@ -64,19 +64,27 @@ for epoch in range(num_epochs):
     model.train()
     for i, (images, labels) in enumerate(train_loader):
         # TODO: Move images and labels to device
+        images.to(device)
+        labels.to(device)
+
         # TODO: Zero the gradients
+        optimizer.zero_grad()
+
         # TODO: Forward pass through the model
+        outputs = model(images)
+
         # TODO: Calculate the loss
-        loss = None
+        loss = loss_fn(outputs, labels)
 
         # TODO: Backward pass
+        loss.backward()
+
         # TODO: Update weights
+        optimizer.step()
 
         train_loss_list.append(loss.item())
         train_step_list.append(step)
-
         step += 1
-        
         if (i + 1) % 100 == 0:
             print(f"Epoch [{epoch + 1}/{num_epochs}], Step [{i + 1}/{len(train_loader)}], Loss: {loss.item():.4f}")
 
@@ -89,12 +97,13 @@ for epoch in range(num_epochs):
         avg_loss = 0.
         for images, labels in val_loader:
             # TODO: Forward pass similar to training
-            outputs = None
-            loss = None
+            outputs = model(images)
+            loss = loss_fn(outputs, labels)
 
             avg_loss += loss.item() * labels.size(0)
             # TODO: Get the predicted labels from the model's outputs
-            predicted = None
+            predicted = torch.argmax(outputs)
+
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
         
@@ -105,7 +114,20 @@ for epoch in range(num_epochs):
         # not fully reliable as the image transformations are different
         # from the validation transformations. But it will inform you of
         # potential issues.
-        train_accuracy = None
+        correct, total = 0, 0
+        for images, labels in train_loader:
+            # TODO: Forward pass similar to training
+            outputs = model(images)
+            loss = loss_fn(outputs, labels)
+
+            avg_loss += loss.item() * labels.size(0)
+            # TODO: Get the predicted labels from the model's outputs
+            predicted = torch.argmax(outputs)
+
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+
+        train_accuracy = correct / total * 100
 
         val_loss_list.append(avg_loss)
         val_accuracy_list.append(val_accuracy)
@@ -142,6 +164,9 @@ for epoch in range(num_epochs):
         plt.close()
 
 torch.save(model.state_dict(), "results/q1_model.pt")
+
+# TODO: TEST model
+exit(0)
 
 # You can copy-paste the following code to another program to evaluate
 # your model separately.
