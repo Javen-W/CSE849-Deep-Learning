@@ -30,6 +30,7 @@ def create_dataloaders():
     train_tf = v2.Compose([
         v2.RandomHorizontalFlip(),
         v2.PILToTensor(),
+        v2.ToDtype(torch.float32, scale=True),
         v2.Normalize(mean=NORMAL_MEAN, std=NORMAL_STD),
         v2.RandomErasing(),
     ])
@@ -37,6 +38,7 @@ def create_dataloaders():
     # TODO: Define the validation transform. No random augmentations here.
     val_tf = v2.Compose([
         v2.PILToTensor(),
+        v2.ToDtype(torch.float32, scale=True),
         v2.Normalize(mean=NORMAL_MEAN, std=NORMAL_STD),
     ])
 

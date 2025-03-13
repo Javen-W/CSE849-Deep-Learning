@@ -24,7 +24,7 @@ class CNN(nn.Module):
 
         self.relu = nn.ReLU()
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=1, padding=1)
-        self.avgpool = nn.AdaptiveAvgPool2d(output_size=80)
+        self.avgpool = nn.AdaptiveAvgPool2d(output_size=1)
 
     def forward(self, x, intermediate_outputs=False):
         # TODO: Compute the forward pass output following the diagram in
@@ -46,7 +46,6 @@ class CNN(nn.Module):
         conv5_out = self.conv5(x)
         x = self.fc(torch.squeeze(self.avgpool(conv5_out)))
 
-        # final_out = torch.max(x)
         final_out = x
 
         if intermediate_outputs:

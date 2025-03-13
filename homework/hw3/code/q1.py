@@ -1,6 +1,6 @@
 import os
-import torch
 import torch.nn as nn
+import torch
 import matplotlib.pyplot as plt
 from glob import glob
 from PIL import Image
@@ -31,8 +31,8 @@ def init_weights(m):
 model.apply(init_weights)
 
 # Set your training parameters here
-num_epochs = 100
-lr = 0.1
+num_epochs = 1
+lr = 0.01
 weight_decay = 1e-4
 
 # Setup your cross-entropy loss function
@@ -164,9 +164,6 @@ for epoch in range(num_epochs):
         plt.close()
 
 torch.save(model.state_dict(), "results/q1_model.pt")
-
-# TODO: TEST model
-exit(0)
 
 # You can copy-paste the following code to another program to evaluate
 # your model separately.
