@@ -23,22 +23,33 @@ model = CNN()
 model.to(device)
 
 # TODO: Initialize weights. You may use kaiming_normal_ for
-# initialization. Check this StackOverflow answer:
-# https://stackoverflow.com/a/49433937/6211109
+# initialization. Check this StackOverflow answer: https://stackoverflow.com/a/49433937/6211109
+def init_weights(m):
+    if isinstance(m, nn.Linear):
+        nn.init.kaiming_normal_(m.weight)
+        m.bias.data.fill_(0.01)
+model.apply(init_weights)
 
 # Set your training parameters here
-num_epochs = None
-lr = None
-weight_decay = None
+num_epochs = 100
+lr = 0.1
+weight_decay = 1e-4
 
 # Setup your cross-entropy loss function
-loss_fn = None
+loss_fn = nn.CrossEntropyLoss()
 
 # Setup your optimizer that uses lr and weight_decay
-optimizer = None
+optimizer = torch.optim.AdamW(
+    lr=lr,
+    weight_decay=weight_decay,
+    params=model.parameters(),
+)
 
 # Setup your learning rate scheduler
-scheduler = None
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+    optimizer=optimizer,
+    T_max=num_epochs,
+)
 
 # For plotting.
 step = 0
