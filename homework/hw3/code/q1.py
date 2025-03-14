@@ -31,7 +31,7 @@ def init_weights(m):
 model.apply(init_weights)
 
 # Set your training parameters here
-num_epochs = 1
+num_epochs = 40
 lr = 0.01
 weight_decay = 1e-4
 
@@ -65,8 +65,7 @@ if not skip_training:
         model.train()
         for i, (images, labels) in enumerate(train_loader):
             # TODO: Move images and labels to device
-            images.to(device)
-            labels.to(device)
+            images, labels = images.to(device), labels.to(device)
 
             # TODO: Zero the gradients
             optimizer.zero_grad()
@@ -95,23 +94,24 @@ if not skip_training:
         with torch.no_grad():
             # Compute validation loss and accuracy
             correct, total = 0, 0
-            avg_loss = 0.
+            avg_loss = 0.0
             for images, labels in val_loader:
                 # TODO: Forward pass similar to training
-                images.to(device)
-                labels.to(device)
+                images, labels = images.to(device), labels.to(device)
                 outputs = model(images)
-
                 loss = loss_fn(outputs, labels)
                 avg_loss += loss.item() * labels.size(0)
 
                 # TODO: Get the predicted labels from the model's outputs
-                predicted = torch.argmax(outputs)
+                predicted = torch.argmax(outputs, dim=1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
 
             val_accuracy = correct / total * 100
             avg_loss /= total
+            val_loss_list.append(avg_loss)
+            val_accuracy_list.append(val_accuracy)
+            val_step_list.append(step)
 
             # Similarly compute training accuracy. This training accuracy is
             # not fully reliable as the image transformations are different
@@ -120,24 +120,18 @@ if not skip_training:
             correct, total = 0, 0
             for images, labels in train_loader:
                 # TODO: Forward pass similar to training
-                images.to(device)
-                labels.to(device)
+                images, labels = images.to(device), labels.to(device)
                 outputs = model(images)
 
                 # TODO: Get the predicted labels from the model's outputs
-                predicted = torch.argmax(outputs)
+                predicted = torch.argmax(outputs, dim=1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
 
             train_accuracy = correct / total * 100
-
-            val_loss_list.append(avg_loss)
-            val_accuracy_list.append(val_accuracy)
             train_accuracy_list.append(train_accuracy)
-            val_step_list.append(step)
-
-            print(f"Epoch [{epoch + 1}/{num_epochs}], Val acc: {val_accuracy:.2f}%,",
-                  f"Train acc: {train_accuracy:.2f}%")
+            print(f"Epoch [{epoch + 1}/{num_epochs}], Val acc: {val_accuracy:.4f}%,",
+                  f"Train acc: {train_accuracy:.4f}%")
 
             # Optionally, you can save only your best model so far by
             # keeping track of best validation accuracies.
@@ -190,8 +184,8 @@ for imgfile in test_images:
     img = test_tf(img)
     img = img.unsqueeze(0).to(device)
     # TODO: Forward pass through the model and get the predicted label
-    output = model(img)
-    predicted = torch.argmax(output)
+    outputs = model(img)
+    predicted = torch.argmax(outputs, dim=1)
     # predicted is a PyTorch tensor containing the predicted label as a
     # single value between 0 and 9 (inclusive)
     test_write.write(f"{filename},{predicted.item()}\n")
