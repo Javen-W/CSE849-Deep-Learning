@@ -46,7 +46,7 @@ class CNN(nn.Module):
         conv5_out = self.conv5(x)
         x = self.fc(torch.squeeze(self.avgpool(conv5_out)))
 
-        final_out = nn.functional.log_softmax(x, dim=1)
+        final_out = nn.functional.log_softmax(x, dim=-1)
 
         if intermediate_outputs:
             return final_out, [conv1_out, conv2_out, conv3_out, conv4_out, conv5_out]

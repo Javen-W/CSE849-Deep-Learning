@@ -185,7 +185,7 @@ for imgfile in test_images:
     img = img.unsqueeze(0).to(device)
     # TODO: Forward pass through the model and get the predicted label
     outputs = model(img)
-    predicted = torch.argmax(outputs, dim=1)
+    predicted = torch.argmax(outputs, dim=-1)
     # predicted is a PyTorch tensor containing the predicted label as a
     # single value between 0 and 9 (inclusive)
     test_write.write(f"{filename},{predicted.item()}\n")
