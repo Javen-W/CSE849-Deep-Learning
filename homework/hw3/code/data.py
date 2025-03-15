@@ -10,6 +10,7 @@ torch.manual_seed(123)
 DATASET_ROOT = '/home/javen/Documents/Datasets/CSE849-HW3/'
 NORMAL_MEAN = [0.438, 0.435, 0.422]
 NORMAL_STD = [0.228, 0.225, 0.231]
+batch_size = 128
 
 """
 class TestDataset(Dataset):
@@ -33,6 +34,7 @@ def create_dataloaders():
         v2.ToDtype(torch.float32, scale=True),
         v2.Normalize(mean=NORMAL_MEAN, std=NORMAL_STD),
         v2.RandomErasing(),
+        v2.GaussianNoise(clip=False),
     ])
 
     # TODO: Define the validation transform. No random augmentations here.
@@ -57,14 +59,14 @@ def create_dataloaders():
     # TODO: Create the train dataloader
     train_loader = DataLoader(
         dataset=train_dataset,
-        batch_size=64,
+        batch_size=batch_size,
         shuffle=True,
     )
 
     # TODO: Create the val dataloader
     val_loader = DataLoader(
         dataset=val_dataset,
-        batch_size=64,
+        batch_size=batch_size,
         shuffle=False,
     )
 
