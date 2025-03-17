@@ -10,7 +10,7 @@ torch.manual_seed(123)
 DATASET_ROOT = '/home/javen/Documents/Datasets/CSE849-HW3/'
 NORMAL_MEAN = [0.438, 0.435, 0.422]
 NORMAL_STD = [0.228, 0.225, 0.231]
-batch_size = 128
+batch_size = 64
 
 """
 class TestDataset(Dataset):
@@ -33,7 +33,7 @@ def create_dataloaders():
         v2.PILToTensor(),
         v2.ToDtype(torch.float32, scale=True),
         v2.Normalize(mean=NORMAL_MEAN, std=NORMAL_STD),
-        v2.RandomErasing(),
+        # v2.RandomErasing(),
         v2.GaussianNoise(clip=False),
     ])
 

@@ -1,0 +1,324 @@
+/home/javen/miniconda3/envs/cse849/bin/python /home/javen/Projects/CSE849/homework/hw3/code/q1.py
+Epoch [1/40], Step [100/704], Loss: 2.0017
+Epoch [1/40], Step [200/704], Loss: 1.6772
+Epoch [1/40], Step [300/704], Loss: 1.4112
+Epoch [1/40], Step [400/704], Loss: 1.1009
+Epoch [1/40], Step [500/704], Loss: 1.1789
+Epoch [1/40], Step [600/704], Loss: 1.1028
+Epoch [1/40], Step [700/704], Loss: 1.0619
+Epoch [1/40], Val acc: 27.7800%, Train acc: 59.8489%
+Qt: Session management error: Could not open network socket
+Epoch [2/40], Step [100/704], Loss: 0.9991
+Epoch [2/40], Step [200/704], Loss: 0.9193
+Epoch [2/40], Step [300/704], Loss: 0.9867
+Epoch [2/40], Step [400/704], Loss: 1.2207
+Epoch [2/40], Step [500/704], Loss: 0.7170
+Epoch [2/40], Step [600/704], Loss: 0.9931
+Epoch [2/40], Step [700/704], Loss: 0.9427
+Epoch [2/40], Val acc: 39.7000%, Train acc: 70.8711%
+Epoch [3/40], Step [100/704], Loss: 0.6568
+Epoch [3/40], Step [200/704], Loss: 1.1659
+Epoch [3/40], Step [300/704], Loss: 1.2804
+Epoch [3/40], Step [400/704], Loss: 0.8177
+Epoch [3/40], Step [500/704], Loss: 0.9140
+Epoch [3/40], Step [600/704], Loss: 0.6814
+Epoch [3/40], Step [700/704], Loss: 0.9451
+Epoch [3/40], Val acc: 44.7000%, Train acc: 71.0111%
+Epoch [4/40], Step [100/704], Loss: 0.7108
+Epoch [4/40], Step [200/704], Loss: 0.7391
+Epoch [4/40], Step [300/704], Loss: 0.7966
+Epoch [4/40], Step [400/704], Loss: 0.6311
+Epoch [4/40], Step [500/704], Loss: 0.8416
+Epoch [4/40], Step [600/704], Loss: 0.9996
+Epoch [4/40], Step [700/704], Loss: 0.8663
+Epoch [4/40], Val acc: 46.2800%, Train acc: 72.0022%
+Epoch [5/40], Step [100/704], Loss: 0.8797
+Epoch [5/40], Step [200/704], Loss: 0.4898
+Epoch [5/40], Step [300/704], Loss: 0.7499
+Epoch [5/40], Step [400/704], Loss: 0.6814
+Epoch [5/40], Step [500/704], Loss: 0.8978
+Epoch [5/40], Step [600/704], Loss: 0.6741
+Epoch [5/40], Step [700/704], Loss: 0.8904
+Epoch [5/40], Val acc: 53.7400%, Train acc: 75.4578%
+Epoch [6/40], Step [100/704], Loss: 0.7457
+Epoch [6/40], Step [200/704], Loss: 0.8662
+Epoch [6/40], Step [300/704], Loss: 0.7259
+Epoch [6/40], Step [400/704], Loss: 0.6528
+Epoch [6/40], Step [500/704], Loss: 0.7967
+Epoch [6/40], Step [600/704], Loss: 0.4403
+Epoch [6/40], Step [700/704], Loss: 0.8100
+Epoch [6/40], Val acc: 55.0200%, Train acc: 77.1111%
+Epoch [7/40], Step [100/704], Loss: 0.6786
+Epoch [7/40], Step [200/704], Loss: 0.9028
+Epoch [7/40], Step [300/704], Loss: 0.4930
+Epoch [7/40], Step [400/704], Loss: 0.6806
+Epoch [7/40], Step [500/704], Loss: 0.5082
+Epoch [7/40], Step [600/704], Loss: 0.7092
+Epoch [7/40], Step [700/704], Loss: 0.6337
+Epoch [7/40], Val acc: 56.8400%, Train acc: 78.9089%
+Epoch [8/40], Step [100/704], Loss: 0.6422
+Epoch [8/40], Step [200/704], Loss: 0.4569
+Epoch [8/40], Step [300/704], Loss: 0.6538
+Epoch [8/40], Step [400/704], Loss: 0.8042
+Epoch [8/40], Step [500/704], Loss: 0.5740
+Epoch [8/40], Step [600/704], Loss: 0.7864
+Epoch [8/40], Step [700/704], Loss: 0.6679
+Epoch [8/40], Val acc: 57.0200%, Train acc: 77.8000%
+Epoch [9/40], Step [100/704], Loss: 0.3011
+Epoch [9/40], Step [200/704], Loss: 0.4278
+Epoch [9/40], Step [300/704], Loss: 0.6445
+Epoch [9/40], Step [400/704], Loss: 0.4275
+Epoch [9/40], Step [500/704], Loss: 0.7169
+Epoch [9/40], Step [600/704], Loss: 0.5347
+Epoch [9/40], Step [700/704], Loss: 0.6486
+Epoch [9/40], Val acc: 60.6600%, Train acc: 82.0511%
+Epoch [10/40], Step [100/704], Loss: 0.4864
+Epoch [10/40], Step [200/704], Loss: 0.6075
+Epoch [10/40], Step [300/704], Loss: 0.5902
+Epoch [10/40], Step [400/704], Loss: 0.6420
+Epoch [10/40], Step [500/704], Loss: 0.6911
+Epoch [10/40], Step [600/704], Loss: 0.6522
+Epoch [10/40], Step [700/704], Loss: 0.5129
+Epoch [10/40], Val acc: 61.0200%, Train acc: 82.2333%
+Epoch [11/40], Step [100/704], Loss: 0.7605
+Epoch [11/40], Step [200/704], Loss: 0.5463
+Epoch [11/40], Step [300/704], Loss: 0.4584
+Epoch [11/40], Step [400/704], Loss: 0.3901
+Epoch [11/40], Step [500/704], Loss: 0.4931
+Epoch [11/40], Step [600/704], Loss: 0.5467
+Epoch [11/40], Step [700/704], Loss: 0.3876
+Epoch [11/40], Val acc: 56.9200%, Train acc: 81.3889%
+Epoch [12/40], Step [100/704], Loss: 0.8166
+Epoch [12/40], Step [200/704], Loss: 0.4919
+Epoch [12/40], Step [300/704], Loss: 0.5376
+Epoch [12/40], Step [400/704], Loss: 0.4312
+Epoch [12/40], Step [500/704], Loss: 0.6792
+Epoch [12/40], Step [600/704], Loss: 0.4682
+Epoch [12/40], Step [700/704], Loss: 0.5451
+Epoch [12/40], Val acc: 61.6200%, Train acc: 80.9889%
+Epoch [13/40], Step [100/704], Loss: 0.5362
+Epoch [13/40], Step [200/704], Loss: 0.5533
+Epoch [13/40], Step [300/704], Loss: 0.4061
+Epoch [13/40], Step [400/704], Loss: 0.6101
+Epoch [13/40], Step [500/704], Loss: 0.4879
+Epoch [13/40], Step [600/704], Loss: 0.6049
+Epoch [13/40], Step [700/704], Loss: 0.5526
+Epoch [13/40], Val acc: 62.0800%, Train acc: 82.6978%
+Epoch [14/40], Step [100/704], Loss: 0.4301
+Epoch [14/40], Step [200/704], Loss: 0.4283
+Epoch [14/40], Step [300/704], Loss: 0.3722
+Epoch [14/40], Step [400/704], Loss: 0.5072
+Epoch [14/40], Step [500/704], Loss: 0.6442
+Epoch [14/40], Step [600/704], Loss: 0.5646
+Epoch [14/40], Step [700/704], Loss: 0.6087
+Epoch [14/40], Val acc: 62.9400%, Train acc: 83.9756%
+Epoch [15/40], Step [100/704], Loss: 0.3680
+Epoch [15/40], Step [200/704], Loss: 0.6711
+Epoch [15/40], Step [300/704], Loss: 0.3643
+Epoch [15/40], Step [400/704], Loss: 0.2892
+Epoch [15/40], Step [500/704], Loss: 0.2354
+Epoch [15/40], Step [600/704], Loss: 0.3530
+Epoch [15/40], Step [700/704], Loss: 0.3059
+Epoch [15/40], Val acc: 63.1800%, Train acc: 85.3533%
+Epoch [16/40], Step [100/704], Loss: 0.3427
+Epoch [16/40], Step [200/704], Loss: 0.3244
+Epoch [16/40], Step [300/704], Loss: 0.4602
+Epoch [16/40], Step [400/704], Loss: 0.5484
+Epoch [16/40], Step [500/704], Loss: 0.3538
+Epoch [16/40], Step [600/704], Loss: 0.4817
+Epoch [16/40], Step [700/704], Loss: 0.3530
+Epoch [16/40], Val acc: 64.3000%, Train acc: 84.9311%
+Epoch [17/40], Step [100/704], Loss: 0.4250
+Epoch [17/40], Step [200/704], Loss: 0.4372
+Epoch [17/40], Step [300/704], Loss: 0.4362
+Epoch [17/40], Step [400/704], Loss: 0.3618
+Epoch [17/40], Step [500/704], Loss: 0.2754
+Epoch [17/40], Step [600/704], Loss: 0.5068
+Epoch [17/40], Step [700/704], Loss: 0.4374
+Epoch [17/40], Val acc: 63.0400%, Train acc: 85.4689%
+Epoch [18/40], Step [100/704], Loss: 0.4023
+Epoch [18/40], Step [200/704], Loss: 0.4409
+Epoch [18/40], Step [300/704], Loss: 0.3421
+Epoch [18/40], Step [400/704], Loss: 0.5059
+Epoch [18/40], Step [500/704], Loss: 0.3371
+Epoch [18/40], Step [600/704], Loss: 0.3727
+Epoch [18/40], Step [700/704], Loss: 0.5585
+Epoch [18/40], Val acc: 63.8400%, Train acc: 86.0978%
+Epoch [19/40], Step [100/704], Loss: 0.3094
+Epoch [19/40], Step [200/704], Loss: 0.3096
+Epoch [19/40], Step [300/704], Loss: 0.4866
+Epoch [19/40], Step [400/704], Loss: 0.3117
+Epoch [19/40], Step [500/704], Loss: 0.4921
+Epoch [19/40], Step [600/704], Loss: 0.3625
+Epoch [19/40], Step [700/704], Loss: 0.3160
+Epoch [19/40], Val acc: 62.7200%, Train acc: 85.5378%
+Epoch [20/40], Step [100/704], Loss: 0.2626
+Epoch [20/40], Step [200/704], Loss: 0.3222
+Epoch [20/40], Step [300/704], Loss: 0.3962
+Epoch [20/40], Step [400/704], Loss: 0.4622
+Epoch [20/40], Step [500/704], Loss: 0.2967
+Epoch [20/40], Step [600/704], Loss: 0.2806
+Epoch [20/40], Step [700/704], Loss: 0.2226
+Epoch [20/40], Val acc: 65.8000%, Train acc: 87.0200%
+Epoch [21/40], Step [100/704], Loss: 0.3736
+Epoch [21/40], Step [200/704], Loss: 0.3162
+Epoch [21/40], Step [300/704], Loss: 0.3168
+Epoch [21/40], Step [400/704], Loss: 0.3887
+Epoch [21/40], Step [500/704], Loss: 0.2660
+Epoch [21/40], Step [600/704], Loss: 0.5140
+Epoch [21/40], Step [700/704], Loss: 0.3787
+Epoch [21/40], Val acc: 66.5000%, Train acc: 88.3244%
+Epoch [22/40], Step [100/704], Loss: 0.3834
+Epoch [22/40], Step [200/704], Loss: 0.3344
+Epoch [22/40], Step [300/704], Loss: 0.3833
+Epoch [22/40], Step [400/704], Loss: 0.4615
+Epoch [22/40], Step [500/704], Loss: 0.3908
+Epoch [22/40], Step [600/704], Loss: 0.4077
+Epoch [22/40], Step [700/704], Loss: 0.4785
+Epoch [22/40], Val acc: 66.1200%, Train acc: 88.4511%
+Epoch [23/40], Step [100/704], Loss: 0.3269
+Epoch [23/40], Step [200/704], Loss: 0.1097
+Epoch [23/40], Step [300/704], Loss: 0.3879
+Epoch [23/40], Step [400/704], Loss: 0.3236
+Epoch [23/40], Step [500/704], Loss: 0.2968
+Epoch [23/40], Step [600/704], Loss: 0.3271
+Epoch [23/40], Step [700/704], Loss: 0.3407
+Epoch [23/40], Val acc: 66.4600%, Train acc: 89.2844%
+Epoch [24/40], Step [100/704], Loss: 0.2565
+Epoch [24/40], Step [200/704], Loss: 0.3119
+Epoch [24/40], Step [300/704], Loss: 0.1803
+Epoch [24/40], Step [400/704], Loss: 0.2848
+Epoch [24/40], Step [500/704], Loss: 0.2752
+Epoch [24/40], Step [600/704], Loss: 0.3613
+Epoch [24/40], Step [700/704], Loss: 0.3800
+Epoch [24/40], Val acc: 67.5000%, Train acc: 90.0444%
+Epoch [25/40], Step [100/704], Loss: 0.2792
+Epoch [25/40], Step [200/704], Loss: 0.2823
+Epoch [25/40], Step [300/704], Loss: 0.2917
+Epoch [25/40], Step [400/704], Loss: 0.4967
+Epoch [25/40], Step [500/704], Loss: 0.1128
+Epoch [25/40], Step [600/704], Loss: 0.3191
+Epoch [25/40], Step [700/704], Loss: 0.1951
+Epoch [25/40], Val acc: 68.4200%, Train acc: 89.9867%
+Epoch [26/40], Step [100/704], Loss: 0.2814
+Epoch [26/40], Step [200/704], Loss: 0.3585
+Epoch [26/40], Step [300/704], Loss: 0.2140
+Epoch [26/40], Step [400/704], Loss: 0.2837
+Epoch [26/40], Step [500/704], Loss: 0.2834
+Epoch [26/40], Step [600/704], Loss: 0.3157
+Epoch [26/40], Step [700/704], Loss: 0.1770
+Epoch [26/40], Val acc: 67.4000%, Train acc: 90.7067%
+Epoch [27/40], Step [100/704], Loss: 0.3588
+Epoch [27/40], Step [200/704], Loss: 0.1322
+Epoch [27/40], Step [300/704], Loss: 0.3152
+Epoch [27/40], Step [400/704], Loss: 0.3432
+Epoch [27/40], Step [500/704], Loss: 0.3833
+Epoch [27/40], Step [600/704], Loss: 0.3148
+Epoch [27/40], Step [700/704], Loss: 0.3174
+Epoch [27/40], Val acc: 67.1600%, Train acc: 90.7800%
+Epoch [28/40], Step [100/704], Loss: 0.2728
+Epoch [28/40], Step [200/704], Loss: 0.2973
+Epoch [28/40], Step [300/704], Loss: 0.2749
+Epoch [28/40], Step [400/704], Loss: 0.5044
+Epoch [28/40], Step [500/704], Loss: 0.2643
+Epoch [28/40], Step [600/704], Loss: 0.2695
+Epoch [28/40], Step [700/704], Loss: 0.3731
+Epoch [28/40], Val acc: 68.0600%, Train acc: 91.3311%
+Epoch [29/40], Step [100/704], Loss: 0.2142
+Epoch [29/40], Step [200/704], Loss: 0.2207
+Epoch [29/40], Step [300/704], Loss: 0.2532
+Epoch [29/40], Step [400/704], Loss: 0.2457
+Epoch [29/40], Step [500/704], Loss: 0.4175
+Epoch [29/40], Step [600/704], Loss: 0.1527
+Epoch [29/40], Step [700/704], Loss: 0.3128
+Epoch [29/40], Val acc: 67.1600%, Train acc: 91.3133%
+Epoch [30/40], Step [100/704], Loss: 0.3682
+Epoch [30/40], Step [200/704], Loss: 0.3774
+Epoch [30/40], Step [300/704], Loss: 0.1705
+Epoch [30/40], Step [400/704], Loss: 0.1940
+Epoch [30/40], Step [500/704], Loss: 0.1849
+Epoch [30/40], Step [600/704], Loss: 0.2457
+Epoch [30/40], Step [700/704], Loss: 0.2746
+Epoch [30/40], Val acc: 67.4600%, Train acc: 91.6622%
+Epoch [31/40], Step [100/704], Loss: 0.4044
+Epoch [31/40], Step [200/704], Loss: 0.1135
+Epoch [31/40], Step [300/704], Loss: 0.2473
+Epoch [31/40], Step [400/704], Loss: 0.2491
+Epoch [31/40], Step [500/704], Loss: 0.3227
+Epoch [31/40], Step [600/704], Loss: 0.1675
+Epoch [31/40], Step [700/704], Loss: 0.2548
+Epoch [31/40], Val acc: 66.7600%, Train acc: 91.1822%
+Epoch [32/40], Step [100/704], Loss: 0.2210
+Epoch [32/40], Step [200/704], Loss: 0.1185
+Epoch [32/40], Step [300/704], Loss: 0.2932
+Epoch [32/40], Step [400/704], Loss: 0.2215
+Epoch [32/40], Step [500/704], Loss: 0.2197
+Epoch [32/40], Step [600/704], Loss: 0.3176
+Epoch [32/40], Step [700/704], Loss: 0.3716
+Epoch [32/40], Val acc: 67.6400%, Train acc: 92.1467%
+Epoch [33/40], Step [100/704], Loss: 0.3809
+Epoch [33/40], Step [200/704], Loss: 0.0821
+Epoch [33/40], Step [300/704], Loss: 0.1865
+Epoch [33/40], Step [400/704], Loss: 0.2345
+Epoch [33/40], Step [500/704], Loss: 0.1407
+Epoch [33/40], Step [600/704], Loss: 0.1548
+Epoch [33/40], Step [700/704], Loss: 0.2955
+Epoch [33/40], Val acc: 68.3600%, Train acc: 92.6000%
+Epoch [34/40], Step [100/704], Loss: 0.1185
+Epoch [34/40], Step [200/704], Loss: 0.1789
+Epoch [34/40], Step [300/704], Loss: 0.1852
+Epoch [34/40], Step [400/704], Loss: 0.1450
+Epoch [34/40], Step [500/704], Loss: 0.2893
+Epoch [34/40], Step [600/704], Loss: 0.2573
+Epoch [34/40], Step [700/704], Loss: 0.1871
+Epoch [34/40], Val acc: 68.1800%, Train acc: 92.6844%
+Epoch [35/40], Step [100/704], Loss: 0.2140
+Epoch [35/40], Step [200/704], Loss: 0.1316
+Epoch [35/40], Step [300/704], Loss: 0.2928
+Epoch [35/40], Step [400/704], Loss: 0.3218
+Epoch [35/40], Step [500/704], Loss: 0.2273
+Epoch [35/40], Step [600/704], Loss: 0.1907
+Epoch [35/40], Step [700/704], Loss: 0.1854
+Epoch [35/40], Val acc: 68.2200%, Train acc: 92.8178%
+Epoch [36/40], Step [100/704], Loss: 0.2777
+Epoch [36/40], Step [200/704], Loss: 0.2238
+Epoch [36/40], Step [300/704], Loss: 0.1767
+Epoch [36/40], Step [400/704], Loss: 0.1656
+Epoch [36/40], Step [500/704], Loss: 0.2532
+Epoch [36/40], Step [600/704], Loss: 0.2089
+Epoch [36/40], Step [700/704], Loss: 0.2424
+Epoch [36/40], Val acc: 68.1800%, Train acc: 92.7867%
+Epoch [37/40], Step [100/704], Loss: 0.2238
+Epoch [37/40], Step [200/704], Loss: 0.1561
+Epoch [37/40], Step [300/704], Loss: 0.1424
+Epoch [37/40], Step [400/704], Loss: 0.2907
+Epoch [37/40], Step [500/704], Loss: 0.1713
+Epoch [37/40], Step [600/704], Loss: 0.1439
+Epoch [37/40], Step [700/704], Loss: 0.1456
+Epoch [37/40], Val acc: 68.6600%, Train acc: 93.0667%
+Epoch [38/40], Step [100/704], Loss: 0.1185
+Epoch [38/40], Step [200/704], Loss: 0.1516
+Epoch [38/40], Step [300/704], Loss: 0.3630
+Epoch [38/40], Step [400/704], Loss: 0.2566
+Epoch [38/40], Step [500/704], Loss: 0.1945
+Epoch [38/40], Step [600/704], Loss: 0.2151
+Epoch [38/40], Step [700/704], Loss: 0.2335
+Epoch [38/40], Val acc: 68.2000%, Train acc: 93.0711%
+Epoch [39/40], Step [100/704], Loss: 0.1158
+Epoch [39/40], Step [200/704], Loss: 0.3081
+Epoch [39/40], Step [300/704], Loss: 0.1287
+Epoch [39/40], Step [400/704], Loss: 0.2032
+Epoch [39/40], Step [500/704], Loss: 0.2298
+Epoch [39/40], Step [600/704], Loss: 0.3596
+Epoch [39/40], Step [700/704], Loss: 0.2368
+Epoch [39/40], Val acc: 68.1800%, Train acc: 93.1111%
+Epoch [40/40], Step [100/704], Loss: 0.2015
+Epoch [40/40], Step [200/704], Loss: 0.1384
+Epoch [40/40], Step [300/704], Loss: 0.1666
+Epoch [40/40], Step [400/704], Loss: 0.3080
+Epoch [40/40], Step [500/704], Loss: 0.1079
+Epoch [40/40], Step [600/704], Loss: 0.5345
+Epoch [40/40], Step [700/704], Loss: 0.2145
+Epoch [40/40], Val acc: 68.3200%, Train acc: 93.1222%
+
+Process finished with exit code 0

@@ -23,7 +23,7 @@ class CNN(nn.Module):
         self.fc = nn.Linear(in_features=80, out_features=10)
 
         self.relu = nn.ReLU()
-        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=1, padding=1)
+        self.maxpool = nn.MaxPool2d(kernel_size=2, stride=2, padding=1)
         self.avgpool = nn.AdaptiveAvgPool2d(output_size=1)
 
     def forward(self, x, intermediate_outputs=False):
