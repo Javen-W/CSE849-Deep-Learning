@@ -33,7 +33,7 @@ def create_dataloaders():
         v2.PILToTensor(),
         v2.ToDtype(torch.float32, scale=True),
         v2.Normalize(mean=NORMAL_MEAN, std=NORMAL_STD),
-        # v2.RandomErasing(),
+        v2.RandomErasing(),
         v2.GaussianNoise(clip=False),
     ])
 
