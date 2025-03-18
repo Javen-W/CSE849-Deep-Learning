@@ -31,7 +31,7 @@ def init_weights(m):
 model.apply(init_weights)
 
 # Set your training parameters here
-num_epochs = 40
+num_epochs = 50
 lr = 0.01
 weight_decay = 1e-4
 
