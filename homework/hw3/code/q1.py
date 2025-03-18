@@ -39,7 +39,7 @@ weight_decay = 1e-4
 loss_fn = nn.CrossEntropyLoss()
 
 # Setup your optimizer that uses lr and weight_decay
-optimizer = torch.optim.AdamW(
+optimizer = torch.optim.Adam(
     lr=lr,
     weight_decay=weight_decay,
     params=model.parameters(),
