@@ -11,6 +11,7 @@ DATASET_ROOT = '/home/javen/Documents/Datasets/CSE849-HW3/'
 NORMAL_MEAN = [0.438, 0.435, 0.422]
 NORMAL_STD = [0.228, 0.225, 0.231]
 batch_size = 64
+num_workers = 4
 
 """
 class TestDataset(Dataset):
@@ -61,6 +62,7 @@ def create_dataloaders():
         dataset=train_dataset,
         batch_size=batch_size,
         shuffle=True,
+        num_workers=num_workers,
     )
 
     # TODO: Create the val dataloader
@@ -68,6 +70,7 @@ def create_dataloaders():
         dataset=val_dataset,
         batch_size=batch_size,
         shuffle=False,
+        num_workers=num_workers,
     )
 
     return train_loader, val_loader

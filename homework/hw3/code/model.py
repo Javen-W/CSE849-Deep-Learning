@@ -25,6 +25,7 @@ class CNN(nn.Module):
         self.relu = nn.ReLU()
         self.maxpool = nn.MaxPool2d(kernel_size=2, stride=2, padding=1)
         self.avgpool = nn.AdaptiveAvgPool2d(output_size=1)
+        self.dropout = nn.Dropout(0.2)
 
     def forward(self, x, intermediate_outputs=False):
         # TODO: Compute the forward pass output following the diagram in
