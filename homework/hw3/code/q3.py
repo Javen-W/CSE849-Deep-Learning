@@ -26,9 +26,15 @@ all_labels = torch.zeros(len(test_loader.dataset))
 step = 0
 for images, labels in test_loader:
     # TODO: Forward pass with intermediate outputs = True
-    _, [x1, x2, x3, x4, x5] = None
-    # TODO: Calculate the norm of the intermediate outputs along the
-    # spatial dimensions. Check the PDF.
+    images, labels = images.to(device), labels.to(device)
+    _, [x1, x2, x3, x4, x5] = model(images, intermediate_outputs=True)
+    # TODO: Calculate the norm of the intermediate outputs along the spatial dimensions. Check the PDF.
+    # x1.shape = [64, 16, 40, 40] -> [64, 16]
+    x1 = torch.norm(x1, p=2, dim=[2, 3])
+    x2 = torch.norm(x2, p=2, dim=[2, 3])
+    x3 = torch.norm(x3, p=2, dim=[2, 3])
+    x4 = torch.norm(x4, p=2, dim=[2, 3])
+    x5 = torch.norm(x5, p=2, dim=[2, 3])
 
     # The following code assumes that x1, ..., x5 are the norms of the
     # intermediate outputs. You may need to change this to suit your code.
@@ -66,6 +72,8 @@ for layer_idx, num_f in enumerate(num_fs):
         fig, ax = plt.subplots()
         data = classwise_score_avg[:, start+f_idx]
         data /= data.max()
+        variance = data.var()
+        print(layer_idx, f_idx, variance)
         ax.bar(labelnames, data)
         ax.set_title(f"Filter {f_idx}")
         plt.xticks(rotation=45)
