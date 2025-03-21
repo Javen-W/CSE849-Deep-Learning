@@ -13,29 +13,18 @@ NORMAL_STD = [0.228, 0.225, 0.231]
 batch_size = 64
 num_workers = 4
 
-"""
-class TestDataset(Dataset):
-    def __init__(self, x, y):
-        super().__init__()
-        self.x = x
-        self.y = y
-
-    def __len__(self):
-        return len(self.x)
-
-    def __getitem__(self, index):
-        return self.x[index].reshape((1,)), self.y[index].reshape((1,))
-"""
 
 def create_dataloaders():
     # TODO: Define the training transform
     train_tf = v2.Compose([
+        # v2.RandomResizedCrop(size=(40, 40), scale=(0.8, 1.0)),  # Adjust size as needed
         v2.RandomHorizontalFlip(),
+        # v2.RandomRotation(degrees=15),
         v2.PILToTensor(),
         v2.ToDtype(torch.float32, scale=True),
         v2.Normalize(mean=NORMAL_MEAN, std=NORMAL_STD),
-        v2.RandomErasing(),
-        v2.GaussianNoise(clip=False),
+        v2.RandomErasing(p=0.5, scale=(0.02, 0.2)),
+        v2.GaussianNoise(mean=0, sigma=0.1, clip=False),
     ])
 
     # TODO: Define the validation transform. No random augmentations here.

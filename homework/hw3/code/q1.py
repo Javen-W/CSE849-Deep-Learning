@@ -25,8 +25,12 @@ model.to(device)
 # TODO: Initialize weights. You may use kaiming_normal_ for
 # initialization. Check this StackOverflow answer: https://stackoverflow.com/a/49433937/6211109
 def init_weights(m):
-    if isinstance(m, nn.Linear):
-        nn.init.kaiming_normal_(m.weight)
+    if isinstance(m, nn.Conv2d):
+        nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+        if m.bias is not None:
+            m.bias.data.fill_(0.01)
+    elif isinstance(m, nn.Linear):
+        nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
         m.bias.data.fill_(0.01)
 model.apply(init_weights)
 
@@ -36,9 +40,17 @@ lr = 0.01
 weight_decay = 1e-4
 
 # Setup your cross-entropy loss function
-loss_fn = nn.CrossEntropyLoss()
+loss_fn = nn.CrossEntropyLoss(label_smoothing=0.1)
 
 # Setup your optimizer that uses lr and weight_decay
+"""
+optimizer = torch.optim.SGD(
+    model.parameters(),
+    lr=lr,
+    momentum=0.9,
+    weight_decay=weight_decay,
+)
+"""
 optimizer = torch.optim.Adam(
     lr=lr,
     weight_decay=weight_decay,
@@ -50,6 +62,14 @@ scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
     optimizer=optimizer,
     T_max=num_epochs,
 )
+"""
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+    optimizer,
+    mode='min',
+    factor=0.1,
+    patience=5
+)
+"""
 
 # For plotting.
 step = 0
@@ -80,6 +100,7 @@ if not skip_training:
             loss.backward()
 
             # TODO: Update weights
+            # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
 
             train_loss_list.append(loss.item())
@@ -88,6 +109,8 @@ if not skip_training:
             if (i + 1) % 100 == 0:
                 print(f"Epoch [{epoch + 1}/{num_epochs}], Step [{i + 1}/{len(train_loader)}], Loss: {loss.item():.4f}")
 
+        # update scheduler
+        # scheduler.step(avg_loss)
         scheduler.step()
 
         model.eval()
