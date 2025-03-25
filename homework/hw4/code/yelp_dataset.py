@@ -7,17 +7,32 @@ class YelpDataset(Dataset):
         self.split = split
         emb_dim = 50
         # TODO: Load the modified GloVe embeddings
-        glove_embs = None
+        glove_embs = torch.load('code/glove/modified_glove_50d.pt')
 
         # TODO: Create a dictionary mapping words to their index in the
         # GloVe embeddings. Remember to add the words in the order as
         # they appear in the dictionary since the same order will be
         # followed in nn.Embedding.from_pretrained used in the main file.
         self.word_indices = {}
-        
+        if isinstance(glove_embs, dict):
+            for idx, word in enumerate(glove_embs.keys()):
+                self.word_indices[word] = idx
+
         # TODO: Load the Yelp dataset and fill in self.reviews and self.stars
         self.reviews = []
         self.stars = []
+        # Load the appropriate JSON file based on the split
+        data_file = f'code/data/yelp_dataset_{self.split}.json'
+        with open(data_file, 'r', encoding='utf-8') as f:
+            for line in f:
+                # Skip empty lines
+                if not line.strip():
+                    continue
+                # Parse each line as a separate JSON object
+                item = json.loads(line.strip())
+                self.reviews.append(item['review'])
+                if split != 'test':
+                    self.stars.append(int(item['stars']) - 1)  # Convert to 0-4 range
 
     def __len__(self):
         return len(self.reviews)

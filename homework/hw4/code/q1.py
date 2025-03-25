@@ -138,7 +138,7 @@ for epoch in pbar:
     axs[1].legend()
 
     fig.tight_layout()
-    fig.savefig("plots/q1_plot.png", dpi=300, bbox_inches="tight")
+    fig.savefig("results/plots/q1_plot.png", dpi=300, bbox_inches="tight")
     plt.close()
 
     sns.heatmap(confusion_matrix, annot=True, fmt="g", cmap="Blues")
@@ -146,9 +146,9 @@ for epoch in pbar:
     plt.ylabel("Actual")
     plt.title("Confusion Matrix")
     plt.tight_layout()
-    plt.savefig("plots/q1_confusion_matrix.png", dpi=300, bbox_inches="tight")
+    plt.savefig("results/plots/q1_confusion_matrix.png", dpi=300, bbox_inches="tight")
     plt.close()
 
-torch.save(model.state_dict(), "q1_model.pt")
-torch.save(classifier.state_dict(), "q1_classifier.pt")
-torch.save(embeddings.state_dict(), "q1_embedding.pt")
+torch.save(model.state_dict(), "results/q1_model.pt")
+torch.save(classifier.state_dict(), "results/q1_classifier.pt")
+torch.save(embeddings.state_dict(), "results/q1_embedding.pt")
