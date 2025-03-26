@@ -12,17 +12,16 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 emb_dim = 50
 hidden_dim = 50
 batch_size = 4
-rnn_dropout = 0.2
+rnn_dropout = 0.35
 num_rnn_layers = 2
-lr = 0.001
-num_epochs = 50
+lr = 0.0001
+num_epochs = 5
 
 train_dataset = YelpDataset("train")
 val_dataset = YelpDataset("val")
 test_dataset = YelpDataset("test")
 
-# TODO: Load the modified GloVe embeddings to nn.Embedding instance. Set
-# freeze=False.
+# TODO: Load the modified GloVe embeddings to nn.Embedding instance. Set freeze=False.
 emb_init_tensor = torch.load('code/glove/modified_glove_50d.pt')
 if isinstance(emb_init_tensor, dict):
     emb_init_tensor = torch.squeeze(torch.stack(list(emb_init_tensor.values())), 1)
@@ -34,8 +33,7 @@ embeddings = nn.Embedding.from_pretrained(
 embeddings = embeddings.to(device)
 
 def collate_fn(batch):
-    # TODO: Implement a collate_fn function. The function should pack
-    # the input and return the stars along with it.
+    # TODO: Implement a collate_fn function. The function should pack the input and return the stars along with it.
     if isinstance(batch[0], tuple):
         sequences, stars = zip(*batch)
         stars = torch.tensor(stars, dtype=torch.long)
@@ -43,18 +41,18 @@ def collate_fn(batch):
         sequences = batch
         stars = None
 
-    # pad sequences
+    # Pad sequences
     input_padded = pad_sequence(
         sequences,
         batch_first=True,
         padding_value=0
     ).to(device)
 
-    # embed padded sequences
+    # Embed padded sequences
     lengths = torch.tensor([len(seq) for seq in sequences], dtype=torch.long).cpu()
     embedded = embeddings(input_padded)
 
-    # pack padded embeddings
+    # Pack padded embeddings
     packed_embeddings = pack_padded_sequence(
         embedded,
         lengths,
@@ -62,7 +60,7 @@ def collate_fn(batch):
         enforce_sorted=False
     )
 
-    # return
+    # Return
     return packed_embeddings.to(device), stars.to(device)
 
 # DataLoader setup
@@ -99,6 +97,7 @@ class RNNModel(nn.Module):
             dropout=dropout,
             batch_first=True,
         )
+        self.dropout = nn.Dropout(p=dropout)
 
     def forward(self, packed_embeddings):
         """
@@ -108,7 +107,7 @@ class RNNModel(nn.Module):
         packed_output, hidden = self.rnn(packed_embeddings)
         # Take the hidden state from the last layer -> Shape: [batch_size, hidden_dim]
         last_hidden = hidden[-1]
-        return last_hidden
+        return self.dropout(last_hidden)
 
 
 # TODO: Create the RNN model
@@ -132,6 +131,7 @@ params = list(embeddings.parameters()) + list(model.parameters()) + list(classif
 optimizer = torch.optim.Adam(
     params,
     lr=lr,
+    weight_decay=1e-4,
 )
 
 # TODO: Create the loss function
@@ -156,21 +156,20 @@ def train_one_epoch():
         """
         TODO:
         1. Get pass the review through the model to get the output.
-        2. Unpack the output and pass the output from the last
-        non-padded time-step through the classifier.
+        2. Unpack the output and pass the output from the last non-padded time-step through the classifier.
         3. Calculate the loss using the criterion.
         4. Update the model parameters.
         """
-        # 1. Pass the review (packed embeddings) through the model
+        # Pass the review (packed embeddings) through the model
         rnn_output = model(reviews)  # Shape: [batch_size, hidden_dim]
 
-        # 2. Pass the RNN output through the linear classifier
+        # Pass the RNN output through the linear classifier
         preds = classifier(rnn_output)  # Shape: [batch_size, 5]
 
-        # 3. Calculate the loss
+        # Calculate the loss
         loss = criterion(preds, stars)
 
-        # 4. Update the model parameters
+        # Update the model parameters
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -192,7 +191,6 @@ def validate():
     num_steps = 0
     correct = 0
     total_samples = 0
-    model.eval()
     confusion_matrix = torch.zeros(5, 5)
 
     model.eval()
@@ -201,13 +199,13 @@ def validate():
 
     for reviews, stars in tqdm(val_loader, leave=False, desc=f"Epoch {epoch+1}/{num_epochs}"):
         # TODO: Implement the validation loop similar to the training loop
-        # 1. Pass the review (packed embeddings) through the model
+        # Pass the review (packed embeddings) through the model
         rnn_output = model(reviews)  # Shape: [batch_size, hidden_dim]
 
-        # 2. Pass the RNN output through the linear classifier
+        # Pass the RNN output through the linear classifier
         preds = classifier(rnn_output)  # Shape: [batch_size, 5]
 
-        # 3. Calculate the loss
+        # Calculate the loss
         loss = criterion(preds, stars)
 
         # Compute metrics
