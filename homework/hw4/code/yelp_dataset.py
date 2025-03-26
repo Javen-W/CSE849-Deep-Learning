@@ -5,7 +5,6 @@ from torch.utils.data import Dataset
 class YelpDataset(Dataset):
     def __init__(self, split):
         self.split = split
-        emb_dim = 50
         # TODO: Load the modified GloVe embeddings
         glove_embs = torch.load('code/glove/modified_glove_50d.pt')
 

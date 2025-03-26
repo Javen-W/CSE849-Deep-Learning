@@ -10,11 +10,12 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Parameters
 emb_dim = 50
+hidden_dim = 50
 batch_size = 4
-rnn_dropout = None
+rnn_dropout = True
 num_rnn_layers = 2
-lr = None
-num_epochs = None
+lr = 0.001
+num_epochs = 50
 
 train_dataset = YelpDataset("train")
 val_dataset = YelpDataset("val")
@@ -83,17 +84,54 @@ test_loader = torch.utils.data.DataLoader(
     collate_fn=collate_fn
 )
 
+class RNNModel(nn.Module):
+    def __init__(self, embedding_dim, hidden_dim, n_layers, dropout):
+        """
+        # RNN with 2 layers
+        # input_size = embedding_dim (50), hidden_size = 50, num_layers = 2
+        """
+        super(RNNModel, self).__init__()
+        self.rnn = nn.GRU(
+            input_size=embedding_dim,
+            hidden_size=hidden_dim,
+            num_layers=n_layers,
+            dropout=dropout,
+            batch_first=True,
+        )
+
+    def forward(self, packed_embeddings):
+        """
+        packed_embeddings: PackedSequence of shape [batch_size, seq_len, embedding_dim]
+        hidden shape: [num_layers, batch_size, hidden_dim]
+        """
+        packed_output, hidden = self.rnn(packed_embeddings)
+        # Take the hidden state from the last layer -> Shape: [batch_size, hidden_dim]
+        last_hidden = hidden[-1]
+        return last_hidden
+
+
 # TODO: Create the RNN model
-model = None
+model = RNNModel(
+    embedding_dim=emb_dim,
+    hidden_dim=hidden_dim,
+    n_layers=num_rnn_layers,
+    dropout=rnn_dropout,
+)
 model = model.to(device)
 
 # TODO: Create the linear classifier
-classifier = None
+classifier = nn.Linear(
+    in_features=hidden_dim,
+    out_features=5,  # ratings 0-4
+)
 classifier = classifier.to(device)
 
 # TODO: Get all parameters and create an optimizer to update them
-params = None
-optimizer = None
+params = list(embeddings.parameters()) + list(model.parameters()) + list(classifier.parameters())
+optimizer = torch.optim.Adam(
+    params,
+    lr=lr,
+)
 
 # TODO: Create the loss function
 criterion = nn.CrossEntropyLoss()
