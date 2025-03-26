@@ -7,6 +7,7 @@ from yelp_dataset import YelpDataset
 import seaborn as sns
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+skip_training = True
 
 # Parameters
 emb_dim = 50
@@ -61,7 +62,9 @@ def collate_fn(batch):
     )
 
     # Return
-    return packed_embeddings.to(device), stars.to(device)
+    if stars is not None:
+        stars = stars.to(device)
+    return packed_embeddings.to(device), stars
 
 # DataLoader setup
 train_loader = torch.utils.data.DataLoader(
@@ -225,44 +228,83 @@ def validate():
 
     return avg_loss, accuracy, confusion_matrix
 
-pbar = trange(num_epochs)
-for epoch in pbar:
-    train_loss, train_accuracy = train_one_epoch()
-    train_loss_list.append(train_loss)
-    train_acc_list.append(train_accuracy)
-    val_loss, val_accuracy, confusion_matrix = validate()
-    val_loss_list.append(val_loss)
-    val_acc_list.append(val_accuracy)
+if not skip_training:
+    pbar = trange(num_epochs)
+    for epoch in pbar:
+        train_loss, train_accuracy = train_one_epoch()
+        train_loss_list.append(train_loss)
+        train_acc_list.append(train_accuracy)
+        val_loss, val_accuracy, confusion_matrix = validate()
+        val_loss_list.append(val_loss)
+        val_acc_list.append(val_accuracy)
 
-    pbar.set_postfix({"Train Loss": f"{train_loss:1.3f}", "Train Accuracy": f"{train_accuracy:1.2f}",
-                      "Val Loss": f"{val_loss:1.3f}", "Val Accuracy": f"{val_accuracy:1.2f}"})
+        pbar.set_postfix({"Train Loss": f"{train_loss:1.3f}", "Train Accuracy": f"{train_accuracy:1.2f}",
+                          "Val Loss": f"{val_loss:1.3f}", "Val Accuracy": f"{val_accuracy:1.2f}"})
 
-    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
-    axs[0].plot(train_loss_list, label="Train")
-    axs[0].plot(val_loss_list, label="Val")
-    axs[0].set_xlabel("Epoch")
-    axs[0].set_ylabel("Loss")
-    axs[0].set_title("Loss")
-    axs[0].legend()
-    axs[1].plot(train_acc_list, label="Train")
-    axs[1].plot(val_acc_list, label="Val")
-    axs[1].set_xlabel("Epoch")
-    axs[1].set_ylabel("Accuracy (%)")
-    axs[1].set_title("Accuracy")
-    axs[1].legend()
+        fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+        axs[0].plot(train_loss_list, label="Train")
+        axs[0].plot(val_loss_list, label="Val")
+        axs[0].set_xlabel("Epoch")
+        axs[0].set_ylabel("Loss")
+        axs[0].set_title("Loss")
+        axs[0].legend()
+        axs[1].plot(train_acc_list, label="Train")
+        axs[1].plot(val_acc_list, label="Val")
+        axs[1].set_xlabel("Epoch")
+        axs[1].set_ylabel("Accuracy (%)")
+        axs[1].set_title("Accuracy")
+        axs[1].legend()
 
-    fig.tight_layout()
-    fig.savefig("results/plots/q1_plot.png", dpi=300, bbox_inches="tight")
-    plt.close()
+        fig.tight_layout()
+        fig.savefig("results/plots/q1_plot.png", dpi=300, bbox_inches="tight")
+        plt.close()
 
-    sns.heatmap(confusion_matrix, annot=True, fmt="g", cmap="Blues")
-    plt.xlabel("Predicted")
-    plt.ylabel("Actual")
-    plt.title("Confusion Matrix")
-    plt.tight_layout()
-    plt.savefig("results/plots/q1_confusion_matrix.png", dpi=300, bbox_inches="tight")
-    plt.close()
+        sns.heatmap(confusion_matrix, annot=True, fmt="g", cmap="Blues")
+        plt.xlabel("Predicted")
+        plt.ylabel("Actual")
+        plt.title("Confusion Matrix")
+        plt.tight_layout()
+        plt.savefig("results/plots/q1_confusion_matrix.png", dpi=300, bbox_inches="tight")
+        plt.close()
 
-torch.save(model.state_dict(), "results/q1_model.pt")
-torch.save(classifier.state_dict(), "results/q1_classifier.pt")
-torch.save(embeddings.state_dict(), "results/q1_embedding.pt")
+    torch.save(model.state_dict(), "results/q1_model.pt")
+    torch.save(classifier.state_dict(), "results/q1_classifier.pt")
+    torch.save(embeddings.state_dict(), "results/q1_embedding.pt")
+
+
+@torch.no_grad()
+def predict_test_set():
+    predictions = []
+    for review, _ in test_loader:
+        # Forward pass
+        rnn_output = model(review)  # Shape: [batch_size, hidden_dim]
+        logits = classifier(rnn_output)  # Shape: [batch_size, 5]
+
+        # Get predicted ratings (0 to 4)
+        preds = torch.argmax(logits, dim=1)  # Shape: [batch_size]
+
+        # Shift predictions from 0-4 to 1-5
+        preds = preds + 1
+
+        # Collect predictions
+        predictions.extend(preds.cpu().numpy())
+
+    return predictions
+
+# Load the best checkpoints
+model.load_state_dict(torch.load("results/q1_model.pt"))
+classifier.load_state_dict(torch.load("results/q1_classifier.pt"))
+embeddings.load_state_dict(torch.load("results/q1_embedding.pt"))
+
+# Set models to evaluation mode
+embeddings.eval()
+model.eval()
+classifier.eval()
+
+# Generate predictions
+test_predictions = predict_test_set()
+
+# Save predictions to q1_test.txt
+with open('results/q1_test.txt', 'w') as f:
+    for pred in test_predictions:
+        f.write(f"{pred}\n")
