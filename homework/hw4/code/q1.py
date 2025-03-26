@@ -12,7 +12,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 emb_dim = 50
 hidden_dim = 50
 batch_size = 4
-rnn_dropout = True
+rnn_dropout = 0.2
 num_rnn_layers = 2
 lr = 0.001
 num_epochs = 50
@@ -62,7 +62,8 @@ def collate_fn(batch):
         enforce_sorted=False
     )
 
-    return packed_embeddings, stars
+    # return
+    return packed_embeddings.to(device), stars.to(device)
 
 # DataLoader setup
 train_loader = torch.utils.data.DataLoader(
@@ -146,9 +147,12 @@ def train_one_epoch():
     num_steps = 0
     correct = 0
     total_samples = 0
-    
+
     model.train()
-    for review, stars in tqdm(train_loader, leave=False, desc=f"Epoch {epoch+1}/{num_epochs}"):
+    classifier.train()
+    embeddings.train()
+
+    for reviews, stars in tqdm(train_loader, leave=False, desc=f"Epoch {epoch+1}/{num_epochs}"):
         """
         TODO:
         1. Get pass the review through the model to get the output.
@@ -157,11 +161,24 @@ def train_one_epoch():
         3. Calculate the loss using the criterion.
         4. Update the model parameters.
         """
+        # 1. Pass the review (packed embeddings) through the model
+        rnn_output = model(reviews)  # Shape: [batch_size, hidden_dim]
+
+        # 2. Pass the RNN output through the linear classifier
+        preds = classifier(rnn_output)  # Shape: [batch_size, 5]
+
+        # 3. Calculate the loss
+        loss = criterion(preds, stars)
+
+        # 4. Update the model parameters
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 
         with torch.no_grad():
             avg_loss += loss.item()
             total_samples += stars.size(0)
-            correct += (torch.argmax(preds, dim=1) == stars-1).sum().item()
+            correct += (torch.argmax(preds, dim=1) == stars).sum().item()
             num_steps += 1
 
     avg_loss /= num_steps
@@ -178,15 +195,31 @@ def validate():
     model.eval()
     confusion_matrix = torch.zeros(5, 5)
 
-    for review, stars in tqdm(val_loader, leave=False, desc=f"Epoch {epoch+1}/{num_epochs}"):
-        # TODO: Implement the validation loop similar to the training loop
+    model.eval()
+    classifier.eval()
+    embeddings.eval()
 
+    for reviews, stars in tqdm(val_loader, leave=False, desc=f"Epoch {epoch+1}/{num_epochs}"):
+        # TODO: Implement the validation loop similar to the training loop
+        # 1. Pass the review (packed embeddings) through the model
+        rnn_output = model(reviews)  # Shape: [batch_size, hidden_dim]
+
+        # 2. Pass the RNN output through the linear classifier
+        preds = classifier(rnn_output)  # Shape: [batch_size, 5]
+
+        # 3. Calculate the loss
+        loss = criterion(preds, stars)
+
+        # Compute metrics
         with torch.no_grad():
             avg_loss += loss.item()
             total_samples += stars.size(0)
-            correct += (torch.argmax(preds, dim=1) == stars-1).sum().item()
+            correct += (torch.argmax(preds, dim=1) == stars).sum().item()
+            # Update confusion matrix
             for i in range(stars.size(0)):
-                confusion_matrix[stars[i]-1, torch.argmax(preds[i])] += 1
+                true_label = stars[i]
+                pred_label = torch.argmax(preds[i])
+                confusion_matrix[true_label, pred_label] += 1
             num_steps += 1
 
     avg_loss /= num_steps
