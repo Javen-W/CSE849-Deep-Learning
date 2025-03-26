@@ -21,13 +21,21 @@ test_dataset = YelpDataset("test")
 
 # TODO: Load the modified GloVe embeddings to nn.Embedding instance. Set
 # freeze=False.
-emb_init_tensor = None
-embeddings = None
+emb_init_tensor = torch.load('code/glove/modified_glove_50d.pt')
+if isinstance(emb_init_tensor, dict):
+    emb_init_tensor = torch.squeeze(torch.stack(list(emb_init_tensor.values())), 1)
+    print(emb_init_tensor.shape)
+
+embeddings = nn.Embedding.from_pretrained(
+    emb_init_tensor,
+    freeze=False
+)
 embeddings = embeddings.to(device)
 
 def collate_fn(batch):
     # TODO: Implement a collate_fn function. The function should pack
     # the input and return the stars along with it.
+    print(batch)
 
     return input_padded, stars
 
@@ -37,6 +45,9 @@ val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size,
                                          shuffle=False, collate_fn=collate_fn)
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size,
                                           shuffle=False, collate_fn=collate_fn)
+
+
+exit(0)
 
 # TODO: Create the RNN model
 model = None
