@@ -1,3 +1,4 @@
+from torch.nn.utils.rnn import pad_sequence, pack_padded_sequence
 from tqdm import trange, tqdm
 import torch
 import torch.nn as nn
@@ -9,7 +10,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Parameters
 emb_dim = 50
-batch_size = None
+batch_size = 4
 rnn_dropout = None
 num_rnn_layers = 2
 lr = None
@@ -25,7 +26,6 @@ emb_init_tensor = torch.load('code/glove/modified_glove_50d.pt')
 if isinstance(emb_init_tensor, dict):
     emb_init_tensor = torch.squeeze(torch.stack(list(emb_init_tensor.values())), 1)
     print(emb_init_tensor.shape)
-
 embeddings = nn.Embedding.from_pretrained(
     emb_init_tensor,
     freeze=False
@@ -35,9 +35,33 @@ embeddings = embeddings.to(device)
 def collate_fn(batch):
     # TODO: Implement a collate_fn function. The function should pack
     # the input and return the stars along with it.
-    print(batch)
+    if isinstance(batch[0], tuple):
+        sequences, stars = zip(*batch)
+        stars = torch.tensor(stars, dtype=torch.long)
+    else:
+        sequences = batch
+        stars = None
 
-    return input_padded, stars
+    # pad sequences
+    input_padded = pad_sequence(
+        sequences,
+        batch_first=True,
+        padding_value=0
+    ).to(device)
+
+    # embed padded sequences
+    lengths = torch.tensor([len(seq) for seq in sequences], dtype=torch.long).cpu()
+    embedded = embeddings(input_padded)
+
+    # pack padded embeddings
+    packed_embeddings = pack_padded_sequence(
+        embedded,
+        lengths,
+        batch_first=True,
+        enforce_sorted=False
+    )
+
+    return packed_embeddings, stars
 
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size,
                                            shuffle=True, collate_fn=collate_fn)
@@ -45,9 +69,6 @@ val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size,
                                          shuffle=False, collate_fn=collate_fn)
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size,
                                           shuffle=False, collate_fn=collate_fn)
-
-
-exit(0)
 
 # TODO: Create the RNN model
 model = None
