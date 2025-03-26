@@ -63,12 +63,25 @@ def collate_fn(batch):
 
     return packed_embeddings, stars
 
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size,
-                                           shuffle=True, collate_fn=collate_fn)
-val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size,
-                                         shuffle=False, collate_fn=collate_fn)
-test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size,
-                                          shuffle=False, collate_fn=collate_fn)
+# DataLoader setup
+train_loader = torch.utils.data.DataLoader(
+    train_dataset,
+    batch_size=batch_size,
+    shuffle=True,
+    collate_fn=collate_fn
+)
+val_loader = torch.utils.data.DataLoader(
+    val_dataset,
+    batch_size=batch_size,
+    shuffle=False,
+    collate_fn=collate_fn
+)
+test_loader = torch.utils.data.DataLoader(
+    test_dataset,
+    batch_size=batch_size,
+    shuffle=False,
+    collate_fn=collate_fn
+)
 
 # TODO: Create the RNN model
 model = None
