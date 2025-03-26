@@ -1,0 +1,5 @@
+1/5 [00:46<03:04, 46.14s/it, Train Loss=1.141, Train Accuracy=48.81, Val Loss=0.978, Val Accuracy=56.86]
+2/5 [01:31<02:17, 45.87s/it, Train Loss=0.953, Train Accuracy=58.06, Val Loss=0.942, Val Accuracy=58.41]
+3/5 [02:17<01:31, 45.99s/it, Train Loss=0.913, Train Accuracy=59.94, Val Loss=0.924, Val Accuracy=59.43]
+4/5 [03:04<00:46, 46.07s/it, Train Loss=0.892, Train Accuracy=60.93, Val Loss=0.906, Val Accuracy=60.08]
+5/5 [03:48<00:00, 45.71s/it, Train Loss=0.879, Train Accuracy=61.63, Val Loss=0.902, Val Accuracy=60.38]
