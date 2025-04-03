@@ -184,7 +184,43 @@ def train_one_epoch():
         8. Add the MSE and CE losses and backpropagate.
         9. Update the parameters.
         """
+        # Zero the gradient
+        optimizer.zero_grad()
+        
+        # Add positional encoding
+        input_pos = pos_enc(input_emb)
+        target_pos = pos_enc(target_emb)
 
+        # Create masks
+        src_mask = model.generate_square_subsequent_mask(input_emb.size(1)).to(device)
+        tgt_mask = model.generate_square_subsequent_mask(target_emb.size(1)).to(device)
+
+        # Forward pass
+        output_emb = model(
+            src=input_pos,
+            tgt=target_pos,
+            src_mask=src_mask,
+            tgt_mask=tgt_mask,
+            src_is_causal=True,
+            tgt_is_causal=True
+        )
+
+        # Decode to vocabulary space
+        output_logits = decoder(output_emb)
+
+        # Calculate the losses
+        mse_loss = mse_criterion(output_emb, target_emb)
+        ce_loss = ce_criterion(
+            output_logits.view(-1, num_tokens),
+            target_words.view(-1)
+        )
+
+        # Update the model parameters
+        total_loss = mse_loss + ce_loss
+        total_loss.backward()
+        optimizer.step()
+
+        # Update metrics
         avg_mse_loss += mse_loss.item()
         avg_ce_loss += ce_loss.item()
         total += 1
