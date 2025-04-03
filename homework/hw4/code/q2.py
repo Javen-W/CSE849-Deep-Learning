@@ -13,8 +13,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 num_tokens = 30
 emb_dim = 100
 batch_size = 4
-lr = None
-num_epochs = None
+lr = 0.0001
+num_epochs = 5
 
 # Character to integer mapping
 alphabets = "abcdefghijklmnopqrstuvwxyz"
@@ -112,19 +112,26 @@ model = nn.Transformer(
 model = model.to(device)
 
 # TODO: Create your decoder from embedding space to the vocabulary space
-decoder = None
+decoder = nn.Linear(
+    in_features=emb_dim,
+    out_features=num_tokens,
+)
 decoder = decoder.to(device)
 
 # Your positional encoder
 pos_enc = PositionalEncoding(emb_dim)
 
 # TODO: Get all parameters to optimize and create your optimizer
-params = None
-optimizer = None
+params = list(embedding.parameters()) + list(model.parameters()) + list(decoder.parameters())
+optimizer = torch.optim.Adam(
+    params,
+    lr=lr,
+    weight_decay=1e-4,
+)
 
 # Set up your loss functions
-mse_criterion = None
-ce_criterion = None
+mse_criterion = nn.MSELoss()
+ce_criterion = nn.CrossEntropyLoss()
 
 # Store your intermediate results for plotting
 epoch_list = []
