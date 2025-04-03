@@ -1,3 +1,4 @@
+from torch.nn.utils.rnn import pad_sequence
 from tqdm import trange, tqdm
 import torch
 import torch.nn as nn
@@ -11,7 +12,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Parameters
 num_tokens = 30
 emb_dim = 100
-batch_size = None
+batch_size = 4
 lr = None
 num_epochs = None
 
@@ -51,8 +52,8 @@ test_dataset = PigLatinSentences("test", char_to_idx)
 
 # TODO: Define your embedding
 embedding = nn.Embedding(
-    num_embeddings=30,
-    embedding_dim=100,
+    num_embeddings=num_tokens,
+    embedding_dim=emb_dim,
     padding_idx=char_to_idx['<pad>'],
 )
 embedding = embedding.to(device)
@@ -67,6 +68,17 @@ def collate_fn(batch):
     output_padded is the output_sequence padded to the maximum sequence
     length in the batch. This is raw text, not embeddings.
     """
+    eng_batch, pig_batch = zip(*batch)
+
+    # pad sequences
+    eng_padded = pad_sequence(eng_batch, batch_first=True, padding_value=char_to_idx['<pad>']).to(device)
+    pig_padded = pad_sequence(pig_batch, batch_first=True, padding_value=char_to_idx['<pad>']).to(device)
+
+    # embed sequences
+    input_sequence = embedding(eng_padded)
+    output_sequence = embedding(pig_padded)
+    output_padded = pig_padded
+
     return input_sequence, output_sequence, output_padded
 
 train_loader = torch.utils.data.DataLoader(
