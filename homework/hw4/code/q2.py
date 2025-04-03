@@ -101,7 +101,14 @@ test_loader = torch.utils.data.DataLoader(
 )
 
 # TODO: Create your Transformer model
-model = None
+model = nn.Transformer(
+    d_model=emb_dim,
+    nhead=2,
+    num_encoder_layers=2,
+    num_decoder_layers=2,
+    dim_feedforward=128,
+    batch_first=True,
+)
 model = model.to(device)
 
 # TODO: Create your decoder from embedding space to the vocabulary space
