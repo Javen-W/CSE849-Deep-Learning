@@ -241,7 +241,7 @@ def train_one_epoch(epoch):
     return avg_mse_loss / total, avg_ce_loss / total, correct / num_samples
 
 @torch.no_grad()
-def validate():
+def validate(epoch):
     avg_mse_loss = 0
     avg_ce_loss = 0
     total = 0
@@ -261,16 +261,68 @@ def validate():
         4. seq_out is updated with the newly generated token.
         5. Repeat this until the maximum sequence length is reached.
         """
-        seq_out = []
-        while len(seq_out) < target_emb.size(0) - 1:
-            pass # FILL THIS
+        # Initialize sequence with <SOS> token
+        batch_size, max_seq_len = target_words.size()
+        sos_token = torch.full(
+            (batch_size, 1),
+            char_to_idx['<sos>'],
+            dtype=torch.long,
+            device=device
+        )
 
+        # Initial decoder input is just <SOS>
+        decoder_input = embedding(sos_token)
+        seq_out = sos_token
+
+        # Generate sequence autoregressively
+        for t in range(max_seq_len - 1):  # -1 because we start with <SOS>
+            # Add positional encoding
+            src_pos = pos_enc(input_emb)
+            tgt_pos = pos_enc(decoder_input)
+
+            # Create masks
+            src_mask = model.generate_square_subsequent_mask(input_emb.size(1)).to(device)
+            tgt_mask = model.generate_square_subsequent_mask(decoder_input.size(1)).to(device)
+
+            # Forward pass
+            output_emb = model(
+                src=src_pos,
+                tgt=tgt_pos,
+                src_mask=src_mask,
+                tgt_mask=tgt_mask,
+                src_is_causal=True,
+                tgt_is_causal=True
+            )
+
+            # Decode to vocabulary space
+            output_logits = decoder(output_emb[:, -1:, :])  # Only take the last token
+
+            # Get predicted token
+            y_hat = output_logits.argmax(dim=-1)
+
+            # Append to sequence
+            seq_out = torch.cat([seq_out, y_hat], dim=1)
+            decoder_input = embedding(seq_out)  # Update decoder input
+
+            # Check for <EOS> token to potentially break early
+            if (y_hat == char_to_idx['<eos>']).all():
+                break
+
+        # Calculate losses
+        output_emb = embedding(seq_out)
+        mse_loss = mse_criterion(output_emb, target_emb[:, :seq_out.size(1)])
+        ce_loss = ce_criterion(
+            decoder(output_emb).view(-1, num_tokens),
+            target_words[:, :seq_out.size(1)].contiguous().view(-1)
+        )
+
+        # Update metrics
         avg_mse_loss += mse_loss.item()
         avg_ce_loss += ce_loss.item()
         total += 1
 
         with torch.no_grad():
-            output_text, expected_text = decode_output(output_logits, target_words, idx_to_char)
+            output_text, expected_text = decode_output(decoder(output_emb), target_words, idx_to_char)
             correct += compare_outputs(output_text, expected_text)
             num_samples += len(output_text)
 
