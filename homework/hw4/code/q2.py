@@ -50,7 +50,11 @@ val_dataset = PigLatinSentences("val", char_to_idx)
 test_dataset = PigLatinSentences("test", char_to_idx)
 
 # TODO: Define your embedding
-embedding = None
+embedding = nn.Embedding(
+    num_embeddings=30,
+    embedding_dim=100,
+    padding_idx=char_to_idx['<pad>'],
+)
 embedding = embedding.to(device)
 
 # TODO: Write your collate_fn
@@ -65,12 +69,24 @@ def collate_fn(batch):
     """
     return input_sequence, output_sequence, output_padded
 
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size,
-                                           shuffle=True, collate_fn=collate_fn)
-val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size,
-                                         shuffle=False, collate_fn=collate_fn)
-test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size,
-                                          shuffle=False, collate_fn=collate_fn)
+train_loader = torch.utils.data.DataLoader(
+    train_dataset,
+    batch_size=batch_size,
+    shuffle=True,
+    collate_fn=collate_fn,
+)
+val_loader = torch.utils.data.DataLoader(
+    val_dataset,
+    batch_size=batch_size,
+    shuffle=False,
+    collate_fn=collate_fn,
+)
+test_loader = torch.utils.data.DataLoader(
+    test_dataset,
+    batch_size=batch_size,
+    shuffle=False,
+    collate_fn=collate_fn,
+)
 
 # TODO: Create your Transformer model
 model = None
