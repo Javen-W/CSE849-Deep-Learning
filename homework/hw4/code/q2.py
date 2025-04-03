@@ -166,6 +166,9 @@ def train_one_epoch(epoch):
     num_samples = 0
 
     model.train()
+    embedding.train()
+    decoder.train()
+
     for input_emb, target_emb, target_words in tqdm(train_loader, leave=False, desc=f"Train epoch {epoch+1}/{num_epochs}"):
         """
         TODO:
@@ -250,6 +253,9 @@ def validate(epoch):
     num_samples = 0
 
     model.eval()
+    embedding.eval()
+    decoder.eval()
+
     for input_emb, target_emb, target_words in tqdm(val_loader, leave=False, desc=f"Val epoch {epoch+1}/{num_epochs}"):
         """
         TODO:
@@ -407,3 +413,30 @@ if not skip_training:
     torch.save(model.state_dict(), "results/q2_model.pt")
     torch.save(decoder.state_dict(), "results/q2_decoder.pt")
     torch.save(embedding.state_dict(), "results/q2_embedding.pt")
+
+
+# Make test predictions
+"""
+@torch.no_grad()
+def predict_test_set():
+    predictions = []
+    return predictions
+
+# Load the best checkpoints
+model.load_state_dict(torch.load("results/q2_model.pt"))
+decoder.load_state_dict(torch.load("results/q2_decoder.pt"))
+embedding.load_state_dict(torch.load("results/q2_embedding.pt"))
+
+# Set models to evaluation mode
+embedding.eval()
+model.eval()
+decoder.eval()
+
+# Generate predictions
+test_predictions = predict_test_set()
+
+# Save predictions to q1_test.txt
+with open('results/q2_test.txt', 'w') as f:
+    for pred in test_predictions:
+        f.write(f"{pred}\n")
+"""
