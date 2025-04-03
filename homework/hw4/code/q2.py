@@ -8,6 +8,7 @@ from positional_encoding import PositionalEncoding
 from pig_latin_sentences import PigLatinSentences
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+skip_training = False
 
 # Parameters
 num_tokens = 30
@@ -339,64 +340,70 @@ def validate(epoch):
     return avg_mse_loss / total, avg_ce_loss / total, correct / num_samples
 
 
-for epoch in trange(num_epochs):
-    train_mse_loss, train_ce_loss, train_acc = train_one_epoch(epoch)
-    val_mse_loss, val_ce_loss, val_acc = validate()
-    train_mse_loss_list.append(train_mse_loss)
-    train_ce_loss_list.append(train_ce_loss)
-    train_acc_list.append(train_acc)
-    val_mse_loss_list.append(val_mse_loss)
-    val_ce_loss_list.append(val_ce_loss)
-    val_acc_list.append(val_acc)
+if not skip_training:
+    for epoch in trange(num_epochs):
+        train_mse_loss, train_ce_loss, train_acc = train_one_epoch(epoch)
+        val_mse_loss, val_ce_loss, val_acc = validate()
+        train_mse_loss_list.append(train_mse_loss)
+        train_ce_loss_list.append(train_ce_loss)
+        train_acc_list.append(train_acc)
+        val_mse_loss_list.append(val_mse_loss)
+        val_ce_loss_list.append(val_ce_loss)
+        val_acc_list.append(val_acc)
 
-train_mse_loss_list = np.array(train_mse_loss_list)
-train_ce_loss_list = np.array(train_ce_loss_list)
-train_acc_list = np.array(train_acc_list)*100
-val_mse_loss_list = np.array(val_mse_loss_list)
-val_ce_loss_list = np.array(val_ce_loss_list)
-val_acc_list = np.array(val_acc_list)*100
+    train_mse_loss_list = np.array(train_mse_loss_list)
+    train_ce_loss_list = np.array(train_ce_loss_list)
+    train_acc_list = np.array(train_acc_list)*100
+    val_mse_loss_list = np.array(val_mse_loss_list)
+    val_ce_loss_list = np.array(val_ce_loss_list)
+    val_acc_list = np.array(val_acc_list)*100
 
-fig, axs = plt.subplots(2, 2, figsize=(10, 10))
+    fig, axs = plt.subplots(2, 2, figsize=(10, 10))
 
-axs[0, 0].plot(np.arange(num_epochs), train_ce_loss_list + train_mse_loss_list, label="Train")
-axs[0, 0].plot(np.arange(num_epochs), val_ce_loss_list + val_mse_loss_list, label="Val")
-axs[0, 0].legend()
-axs[0, 0].set_title("Total Loss")
-axs[0, 0].set_xlabel("Epoch")
-axs[0, 0].set_ylabel("Loss")
-axs[0, 0].set_yscale("log")
+    axs[0, 0].plot(np.arange(num_epochs), train_ce_loss_list + train_mse_loss_list, label="Train")
+    axs[0, 0].plot(np.arange(num_epochs), val_ce_loss_list + val_mse_loss_list, label="Val")
+    axs[0, 0].legend()
+    axs[0, 0].set_title("Total Loss")
+    axs[0, 0].set_xlabel("Epoch")
+    axs[0, 0].set_ylabel("Loss")
+    axs[0, 0].set_yscale("log")
 
-axs[0, 1].plot(np.arange(num_epochs), train_acc_list, label="Train")
-axs[0, 1].plot(np.arange(num_epochs), val_acc_list, label="Val")
-axs[0, 1].legend()
-axs[0, 1].set_title("Accuracy")
-axs[0, 1].set_xlabel("Epoch")
-axs[0, 1].set_ylabel("Accuracy (%)")
+    axs[0, 1].plot(np.arange(num_epochs), train_acc_list, label="Train")
+    axs[0, 1].plot(np.arange(num_epochs), val_acc_list, label="Val")
+    axs[0, 1].legend()
+    axs[0, 1].set_title("Accuracy")
+    axs[0, 1].set_xlabel("Epoch")
+    axs[0, 1].set_ylabel("Accuracy (%)")
 
-axs[1, 0].plot(np.arange(num_epochs), train_mse_loss_list, label="Train")
-axs[1, 0].plot(np.arange(num_epochs), val_mse_loss_list, label="Val")
-axs[1, 0].legend()
-axs[1, 0].set_title("MSE Loss")
-axs[1, 0].set_xlabel("Epoch")
-axs[1, 0].set_ylabel("Loss")
-axs[1, 0].set_yscale("log")
+    axs[1, 0].plot(np.arange(num_epochs), train_mse_loss_list, label="Train")
+    axs[1, 0].plot(np.arange(num_epochs), val_mse_loss_list, label="Val")
+    axs[1, 0].legend()
+    axs[1, 0].set_title("MSE Loss")
+    axs[1, 0].set_xlabel("Epoch")
+    axs[1, 0].set_ylabel("Loss")
+    axs[1, 0].set_yscale("log")
 
-axs[1, 1].plot(np.arange(num_epochs), train_ce_loss_list, label="Train")
-axs[1, 1].plot(np.arange(num_epochs), val_ce_loss_list, label="Val")
-axs[1, 1].legend()
-axs[1, 1].set_title("CE Loss")
-axs[1, 1].set_xlabel("Epoch")
-axs[1, 1].set_ylabel("Loss")
-axs[1, 1].set_yscale("log")
+    axs[1, 1].plot(np.arange(num_epochs), train_ce_loss_list, label="Train")
+    axs[1, 1].plot(np.arange(num_epochs), val_ce_loss_list, label="Val")
+    axs[1, 1].legend()
+    axs[1, 1].set_title("CE Loss")
+    axs[1, 1].set_xlabel("Epoch")
+    axs[1, 1].set_ylabel("Loss")
+    axs[1, 1].set_yscale("log")
 
-fig.tight_layout()
-fig.savefig("plots/q2_results.png", dpi=300)
-plt.close()
+    fig.tight_layout()
+    fig.savefig("results/plots/q2_results.png", dpi=300)
+    plt.close()
 
-print("Final accuracy")
-print(f"Train: {train_acc_list[-1]:1.2f}")
-print(f"Val: {val_acc_list[-1]:1.2f}")
-print("Final losses")
-print(f"Train MSE: {train_mse_loss_list[-1]:1.3f}")
-print(f"Train CE: {train_ce_loss_list[-1]:1.3f}")
-print(f"Val MSE: {val_mse_loss_list[-1]:1.3f}")
+    print("Final accuracy")
+    print(f"Train: {train_acc_list[-1]:1.2f}")
+    print(f"Val: {val_acc_list[-1]:1.2f}")
+    print("Final losses")
+    print(f"Train MSE: {train_mse_loss_list[-1]:1.3f}")
+    print(f"Train CE: {train_ce_loss_list[-1]:1.3f}")
+    print(f"Val MSE: {val_mse_loss_list[-1]:1.3f}")
+
+    # Save model parameters
+    torch.save(model.state_dict(), "results/q2_model.pt")
+    torch.save(decoder.state_dict(), "results/q2_decoder.pt")
+    torch.save(embedding.state_dict(), "results/q2_embedding.pt")
