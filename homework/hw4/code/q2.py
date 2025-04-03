@@ -40,7 +40,7 @@ def decode_output(output_logits, expected_words, idx_to_char):
     out_decoded = []
     exp_decoded = []
     pad_pos = char_to_idx['<pad>']
-    for i in range(output_logits.size(1)):
+    for i in range(output_logits.size(0)):
         out_decoded.append("".join([idx_to_char[idx] for idx in out_words[:, i] if idx != pad_pos]))
         exp_decoded.append("".join([idx_to_char[idx] for idx in expected_words[:, i] if idx != pad_pos]))
 
@@ -70,11 +70,11 @@ def collate_fn(batch):
     """
     eng_batch, pig_batch = zip(*batch)
 
-    # pad sequences
+    # Pad sequences
     eng_padded = pad_sequence(eng_batch, batch_first=True, padding_value=char_to_idx['<pad>']).to(device)
     pig_padded = pad_sequence(pig_batch, batch_first=True, padding_value=char_to_idx['<pad>']).to(device)
 
-    # embed sequences
+    # Embed sequences
     input_sequence = embedding(eng_padded)
     output_sequence = embedding(pig_padded)
     output_padded = pig_padded
@@ -131,7 +131,7 @@ optimizer = torch.optim.Adam(
 
 # Set up your loss functions
 mse_criterion = nn.MSELoss()
-ce_criterion = nn.CrossEntropyLoss()
+ce_criterion = nn.CrossEntropyLoss(ignore_index=char_to_idx['<pad>'])
 
 # Store your intermediate results for plotting
 epoch_list = []
@@ -152,14 +152,12 @@ def compare_outputs(output_text, expected_text):
         if "<eos>" in out:
             out = out.split("<eos>")[0]
         exp = exp.split("<eos>")[0]
-
         if out == exp:
             correct += 1
-    
     return correct
         
 
-def train_one_epoch():
+def train_one_epoch(epoch):
     avg_mse_loss = 0
     avg_ce_loss = 0
     total = 0
@@ -186,7 +184,7 @@ def train_one_epoch():
         """
         # Zero the gradient
         optimizer.zero_grad()
-        
+
         # Add positional encoding
         input_pos = pos_enc(input_emb)
         target_pos = pos_enc(target_emb)
@@ -290,7 +288,7 @@ def validate():
 
 
 for epoch in trange(num_epochs):
-    train_mse_loss, train_ce_loss, train_acc = train_one_epoch()
+    train_mse_loss, train_ce_loss, train_acc = train_one_epoch(epoch)
     val_mse_loss, val_ce_loss, val_acc = validate()
     train_mse_loss_list.append(train_mse_loss)
     train_ce_loss_list.append(train_ce_loss)
