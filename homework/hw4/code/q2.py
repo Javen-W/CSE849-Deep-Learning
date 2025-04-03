@@ -13,9 +13,9 @@ skip_training = False
 # Parameters
 num_tokens = 30
 emb_dim = 100
-batch_size = 4
+batch_size = 64
 lr = 0.0001
-num_epochs = 5
+num_epochs = 1
 
 # Character to integer mapping
 alphabets = "abcdefghijklmnopqrstuvwxyz"
@@ -144,17 +144,8 @@ val_ce_loss_list = []
 val_acc_list = []
 
 def compare_outputs(output_text, expected_text):
-    correct = 0
-    for i in range(len(output_text)):
-        out = output_text[i]
-        exp = expected_text[i]
-        exp = exp.split("<sos>")[1] # remove <sos>
-        # remove <eos>
-        if "<eos>" in out:
-            out = out.split("<eos>")[0]
-        exp = exp.split("<eos>")[0]
-        if out == exp:
-            correct += 1
+    correct = sum(1 for out, exp in zip(output_text, expected_text)
+                 if out.split('<eos>')[0] == exp.split('<eos>')[0].split('<sos>')[-1])
     return correct
         
 
@@ -233,8 +224,7 @@ def train_one_epoch(epoch):
             num_samples += len(output_text)
 
     # display the decoded outputs only for the last step of each epoch
-    rand_idx = [_.item() for _ in torch.randint(0, len(output_text),
-                                                (min(10, len(output_text)),))]
+    rand_idx = [_.item() for _ in torch.randint(0, len(output_text), (min(10, len(output_text)),))]
     for i in rand_idx:
         out_ = output_text[i]
         exp_ = expected_text[i]
@@ -317,9 +307,10 @@ def validate(epoch):
 
         # Calculate losses
         output_emb = embedding(seq_out)
+        output_logits = decoder(output_emb)
         mse_loss = mse_criterion(output_emb, target_emb[:, :seq_out.size(1)])
         ce_loss = ce_criterion(
-            decoder(output_emb).view(-1, num_tokens),
+            output_logits.view(-1, num_tokens),
             target_words[:, :seq_out.size(1)].contiguous().view(-1)
         )
 
@@ -329,7 +320,7 @@ def validate(epoch):
         total += 1
 
         with torch.no_grad():
-            output_text, expected_text = decode_output(decoder(output_emb), target_words, idx_to_char)
+            output_text, expected_text = decode_output(output_logits, target_words, idx_to_char)
             correct += compare_outputs(output_text, expected_text)
             num_samples += len(output_text)
 
@@ -349,7 +340,7 @@ def validate(epoch):
 if not skip_training:
     for epoch in trange(num_epochs):
         train_mse_loss, train_ce_loss, train_acc = train_one_epoch(epoch)
-        val_mse_loss, val_ce_loss, val_acc = validate()
+        val_mse_loss, val_ce_loss, val_acc = validate(epoch)
         train_mse_loss_list.append(train_mse_loss)
         train_ce_loss_list.append(train_ce_loss)
         train_acc_list.append(train_acc)
