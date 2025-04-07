@@ -9,14 +9,14 @@ from pig_latin_sentences import PigLatinSentences
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 skip_training = False
-skip_validation = True
+skip_validation = False
 
 # Parameters
 num_tokens = 30
 emb_dim = 100
 batch_size = 32
 lr = 0.0001
-num_epochs = 10
+num_epochs = 1
 
 # Character to integer mapping
 alphabets = "abcdefghijklmnopqrstuvwxyz"
@@ -36,29 +36,52 @@ for char, idx in char_to_idx.items():
     idx_to_char[idx] = char
 
 @torch.no_grad()
-def decode_output(output_logits, expected_words, idx_to_char):
-    out_words = output_logits.argmax(2).detach().cpu().numpy()
-    expected_words = expected_words.detach().cpu().numpy()
+def decode_output(output_logits, expected_words):
+    out_words = output_logits.argmax(dim=-1).detach().cpu().numpy()  # (batch_size, seq_len)
+    expected_words = expected_words.detach().cpu().numpy()  # (batch_size, seq_len)
     out_decoded = []
     exp_decoded = []
-    pad_pos = char_to_idx['<pad>']
-    for i in range(output_logits.size(0)):
-        out_decoded.append("".join([idx_to_char[idx] for idx in out_words[:, i] if idx != pad_pos]))
-        exp_decoded.append("".join([idx_to_char[idx] for idx in expected_words[:, i] if idx != pad_pos]))
+    pad_idx = char_to_idx['<pad>']
+    eos_idx = char_to_idx['<eos>']
+
+    for i in range(out_words.shape[0]):  # Iterate over batch
+        # Decode output sequence
+        out_seq = []
+        for idx in out_words[i]:
+            if idx == pad_idx:
+                continue
+            out_seq.append(idx_to_char[idx])
+            if idx == eos_idx:
+                break
+        out_decoded.append("".join(out_seq))
+
+        # Decode expected sequence
+        exp_seq = []
+        for idx in expected_words[i]:
+            if idx == pad_idx:
+                continue
+            exp_seq.append(idx_to_char[idx])
+            if idx == eos_idx:
+                break
+        exp_decoded.append("".join(exp_seq))
 
     return out_decoded, exp_decoded
 
-train_dataset = PigLatinSentences("train", char_to_idx)
-val_dataset = PigLatinSentences("val", char_to_idx)
-test_dataset = PigLatinSentences("test", char_to_idx)
-
-# TODO: Define your embedding
-embedding = nn.Embedding(
-    num_embeddings=num_tokens,
-    embedding_dim=emb_dim,
-    padding_idx=char_to_idx['<pad>'],
-)
-embedding = embedding.to(device)
+def compare_outputs(output_text, expected_text):
+    correct = 0
+    for out, exp in zip(output_text, expected_text):
+        # Remove <sos> prefix if present
+        out = out.replace("<sos>", "")
+        exp = exp.replace("<sos>", "")
+        # Take content before <eos> if present
+        out = out.split("<eos>")[0] if "<eos>" in out else out
+        exp = exp.split("<eos>")[0] if "<eos>" in exp else exp
+        # Strip padding and whitespace
+        out = out.strip()
+        exp = exp.strip()
+        if out == exp:
+            correct += 1
+    return correct
 
 # TODO: Write your collate_fn
 def collate_fn(batch):
@@ -83,24 +106,23 @@ def collate_fn(batch):
 
     return input_sequence, output_sequence, output_padded
 
-train_loader = torch.utils.data.DataLoader(
-    train_dataset,
-    batch_size=batch_size,
-    shuffle=True,
-    collate_fn=collate_fn,
+# Create Datasets
+train_dataset = PigLatinSentences("train", char_to_idx)
+val_dataset = PigLatinSentences("val", char_to_idx)
+test_dataset = PigLatinSentences("test", char_to_idx)
+
+# TODO: Define your embedding
+embedding = nn.Embedding(
+    num_embeddings=num_tokens,
+    embedding_dim=emb_dim,
+    padding_idx=char_to_idx['<pad>'],
 )
-val_loader = torch.utils.data.DataLoader(
-    val_dataset,
-    batch_size=batch_size,
-    shuffle=False,
-    collate_fn=collate_fn,
-)
-test_loader = torch.utils.data.DataLoader(
-    test_dataset,
-    batch_size=batch_size,
-    shuffle=False,
-    collate_fn=collate_fn,
-)
+embedding = embedding.to(device)
+
+# Create DataLoaders
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn,)
+val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn,)
+test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn,)
 
 # TODO: Create your Transformer model
 model = nn.Transformer(
@@ -145,12 +167,6 @@ train_acc_list = []
 val_mse_loss_list = []
 val_ce_loss_list = []
 val_acc_list = []
-
-def compare_outputs(output_text, expected_text):
-    correct = sum(1 for out, exp in zip(output_text, expected_text)
-                 if out.split('<eos>')[0] == exp.split('<eos>')[0].split('<sos>')[-1])
-    return correct
-        
 
 def train_one_epoch(epoch):
     avg_mse_loss = 0
@@ -222,7 +238,7 @@ def train_one_epoch(epoch):
         total_batches += 1
 
         with torch.no_grad():
-            output_text, expected_text = decode_output(output_logits, target_words, idx_to_char)
+            output_text, expected_text = decode_output(output_logits, target_words)
             total_correct += compare_outputs(output_text, expected_text)
             total_samples += len(output_text)
 
@@ -240,7 +256,6 @@ def train_one_epoch(epoch):
     print(f"Training Accuracy ({epoch}): {epoch_accuracy}")
 
     return avg_mse_loss / total_batches, avg_ce_loss / total_batches, epoch_accuracy
-
 
 @torch.no_grad()
 def validate(epoch):
@@ -291,7 +306,7 @@ def validate(epoch):
         total_ce_loss += ce_loss.item()
         total_batches += 1
 
-        output_text, expected_text = decode_output(output_logits, target_words, idx_to_char)
+        output_text, expected_text = decode_output(output_logits, target_words)
         total_correct += compare_outputs(output_text, expected_text)
         total_samples += len(output_text)
         last_output_text, last_expected_text = output_text, expected_text
