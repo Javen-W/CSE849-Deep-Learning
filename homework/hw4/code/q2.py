@@ -17,7 +17,7 @@ num_tokens = 30
 emb_dim = 100
 batch_size = 32
 lr = 0.001
-num_epochs = 50
+num_epochs = 1
 num_workers = 0
 
 # Character to integer mapping
@@ -233,6 +233,7 @@ def train_one_epoch(epoch):
         # Update the model parameters
         total_loss = mse_loss + ce_loss
         total_loss.backward()
+        torch.nn.utils.clip_grad_norm_(params, max_norm=1.0)
         optimizer.step()
 
         # Update metrics
@@ -254,11 +255,13 @@ def train_one_epoch(epoch):
         print(f"Train Expected: \"{exp_}\"")
         print("----"*40)
 
-    # Calculate metrics
-    epoch_accuracy = (total_correct / total_samples) * 100.0
-    print(f"Training Accuracy ({epoch}): {epoch_accuracy}")
+        # Calculate metrics
+        avg_mse = avg_mse_loss / total_batches
+        avg_ce = avg_ce_loss / total_batches
+        accuracy = (total_correct / total_samples) * 100.0 if total_samples > 0 else 0.0
+        print(f"Validation MSE: {avg_mse:.4f}, CE: {avg_ce:.4f}, Accuracy: {accuracy:.2f}%")
 
-    return avg_mse_loss / total_batches, avg_ce_loss / total_batches, epoch_accuracy
+        return avg_mse, avg_ce, accuracy
 
 @torch.no_grad()
 def validate(epoch):
