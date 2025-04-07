@@ -13,9 +13,9 @@ skip_training = False
 # Parameters
 num_tokens = 30
 emb_dim = 100
-batch_size = 64
-lr = 0.0001
-num_epochs = 1
+batch_size = 32
+lr = 0.001
+num_epochs = 10
 
 # Character to integer mapping
 alphabets = "abcdefghijklmnopqrstuvwxyz"
@@ -117,6 +117,8 @@ decoder = nn.Linear(
     in_features=emb_dim,
     out_features=num_tokens,
 )
+nn.init.xavier_uniform_(decoder.weight)
+nn.init.zeros_(decoder.bias)
 decoder = decoder.to(device)
 
 # Your positional encoder
@@ -234,6 +236,7 @@ def train_one_epoch(epoch):
 
     return avg_mse_loss / total, avg_ce_loss / total, correct / num_samples
 
+
 @torch.no_grad()
 def validate(epoch):
     avg_mse_loss = 0
@@ -268,11 +271,11 @@ def validate(epoch):
         )
 
         # Initial decoder input is just <SOS>
-        decoder_input = embedding(sos_token)
         seq_out = sos_token
+        decoder_input = embedding(sos_token)
 
         # Generate sequence autoregressively
-        for t in range(max_seq_len - 1):  # -1 because we start with <SOS>
+        for t in range(max_seq_len):  # -1 because we start with <SOS>
             # Add positional encoding
             src_pos = pos_enc(input_emb)
             tgt_pos = pos_enc(decoder_input)
@@ -292,7 +295,9 @@ def validate(epoch):
             )
 
             # Decode to vocabulary space
-            output_logits = decoder(output_emb[:, -1:, :])  # Only take the last token
+            output_logits = decoder(output_emb[:, -1:, :])
+            if t > 0:  # Prevent <sos> after first token
+                output_logits[:, :, char_to_idx['<sos>']] = -float('inf')
 
             # Get predicted token
             y_hat = output_logits.argmax(dim=-1)
@@ -305,14 +310,15 @@ def validate(epoch):
             if (y_hat == char_to_idx['<eos>']).all():
                 break
 
-        # Calculate losses
-        output_emb = embedding(seq_out)
+        # Calculate the losses
         output_logits = decoder(output_emb)
-        mse_loss = mse_criterion(output_emb, target_emb[:, :seq_out.size(1)])
+        mse_loss = mse_criterion(output_emb, target_emb)
         ce_loss = ce_criterion(
             output_logits.view(-1, num_tokens),
-            target_words[:, :seq_out.size(1)].contiguous().view(-1)
+            target_words.view(-1)
         )
+        # print(seq_out[0, :], seq_out.shape)
+        # print(target_words[0, :], target_words.shape)
 
         # Update metrics
         avg_mse_loss += mse_loss.item()
@@ -325,8 +331,7 @@ def validate(epoch):
             num_samples += len(output_text)
 
     # display the decoded outputs only for the last step of each epoch
-    rand_idx = [_.item() for _ in torch.randint(0, len(output_text),
-                                                (min(10, len(output_text)),))]
+    rand_idx = [_.item() for _ in torch.randint(0, len(output_text), (min(10, len(output_text)),))]
     for i in rand_idx:
         out_ = output_text[i]
         exp_ = expected_text[i]
@@ -339,21 +344,38 @@ def validate(epoch):
 
 if not skip_training:
     for epoch in trange(num_epochs):
+        # Train
         train_mse_loss, train_ce_loss, train_acc = train_one_epoch(epoch)
-        val_mse_loss, val_ce_loss, val_acc = validate(epoch)
         train_mse_loss_list.append(train_mse_loss)
         train_ce_loss_list.append(train_ce_loss)
         train_acc_list.append(train_acc)
-        val_mse_loss_list.append(val_mse_loss)
-        val_ce_loss_list.append(val_ce_loss)
-        val_acc_list.append(val_acc)
 
+    # Validate
+    val_mse_loss, val_ce_loss, val_acc = validate(epoch=0)
+    val_mse_loss_list.append(val_mse_loss)
+    val_ce_loss_list.append(val_ce_loss)
+    val_acc_list.append(val_acc)
+
+    # Save model parameters
+    torch.save(model.state_dict(), "results/q2_model.pt")
+    torch.save(decoder.state_dict(), "results/q2_decoder.pt")
+    torch.save(embedding.state_dict(), "results/q2_embedding.pt")
+
+    # Report & Plot
     train_mse_loss_list = np.array(train_mse_loss_list)
     train_ce_loss_list = np.array(train_ce_loss_list)
     train_acc_list = np.array(train_acc_list)*100
     val_mse_loss_list = np.array(val_mse_loss_list)
     val_ce_loss_list = np.array(val_ce_loss_list)
     val_acc_list = np.array(val_acc_list)*100
+
+    print("Final accuracy")
+    print(f"Train: {train_acc_list[-1]:1.2f}")
+    print(f"Val: {val_acc_list[-1]:1.2f}")
+    print("Final losses")
+    print(f"Train MSE: {train_mse_loss_list[-1]:1.3f}")
+    print(f"Train CE: {train_ce_loss_list[-1]:1.3f}")
+    print(f"Val MSE: {val_mse_loss_list[-1]:1.3f}")
 
     fig, axs = plt.subplots(2, 2, figsize=(10, 10))
 
@@ -391,19 +413,6 @@ if not skip_training:
     fig.tight_layout()
     fig.savefig("results/plots/q2_results.png", dpi=300)
     plt.close()
-
-    print("Final accuracy")
-    print(f"Train: {train_acc_list[-1]:1.2f}")
-    print(f"Val: {val_acc_list[-1]:1.2f}")
-    print("Final losses")
-    print(f"Train MSE: {train_mse_loss_list[-1]:1.3f}")
-    print(f"Train CE: {train_ce_loss_list[-1]:1.3f}")
-    print(f"Val MSE: {val_mse_loss_list[-1]:1.3f}")
-
-    # Save model parameters
-    torch.save(model.state_dict(), "results/q2_model.pt")
-    torch.save(decoder.state_dict(), "results/q2_decoder.pt")
-    torch.save(embedding.state_dict(), "results/q2_embedding.pt")
 
 
 # Make test predictions
