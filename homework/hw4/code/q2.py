@@ -8,7 +8,7 @@ from positional_encoding import PositionalEncoding
 from pig_latin_sentences import PigLatinSentences
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-skip_training = True
+skip_training = False
 skip_validation = True
 
 # Parameters
@@ -16,7 +16,8 @@ num_tokens = 30
 emb_dim = 100
 batch_size = 32
 lr = 0.0001
-num_epochs = 5
+num_epochs = 10
+num_workers = 0
 
 # Character to integer mapping
 alphabets = "abcdefghijklmnopqrstuvwxyz"
@@ -120,9 +121,9 @@ embedding = nn.Embedding(
 embedding = embedding.to(device)
 
 # Create DataLoaders
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn,)
-val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn,)
-test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn,)
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn,num_workers=num_workers)
+val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn,num_workers=num_workers)
+test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn,num_workers=num_workers)
 
 # TODO: Create your Transformer model
 model = nn.Transformer(
@@ -298,7 +299,6 @@ def validate(epoch):
         src_pos = pos_enc(input_emb)
         src_mask = model.generate_square_subsequent_mask(input_emb.size(1)).to(device)
         memory = model.encoder(src_pos, mask=src_mask, is_causal=True)
-        print(f"Memory mean: {memory.mean().item()}, std: {memory.std().item()}")
 
         # Generate sequence autoregressively
         for t in range(max_seq_len - 1):  # -1 because we start with <SOS>
