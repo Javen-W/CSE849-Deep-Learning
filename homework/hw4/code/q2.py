@@ -9,14 +9,14 @@ from pig_latin_sentences import PigLatinSentences
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 skip_training = False
-skip_validation = False
+skip_validation = True
 
 # Parameters
 num_tokens = 30
 emb_dim = 100
 batch_size = 32
 lr = 0.0001
-num_epochs = 1
+num_epochs = 5
 
 # Character to integer mapping
 alphabets = "abcdefghijklmnopqrstuvwxyz"
@@ -259,10 +259,10 @@ def train_one_epoch(epoch):
 
 @torch.no_grad()
 def validate(epoch):
-    total_mse_loss = 0
-    total_ce_loss = 0
-    total_correct = 0
+    avg_mse_loss = 0
+    avg_ce_loss = 0
     total_samples = 0
+    total_correct = 0
     total_batches = 0
 
     model.eval()
@@ -270,54 +270,100 @@ def validate(epoch):
     decoder.eval()
 
     for input_emb, target_emb, target_words in tqdm(val_loader, leave=False, desc=f"Val epoch {epoch+1}/{num_epochs}"):
+        """
+        TODO:
+        1. Similar to the training loop, set up the embeddings for the
+        forward pass. But this time, we only pass the <SOS> token in the
+        first step.
+        2. The decoded output will be stored in seq_out.
+        3. In the next time step, we will pass the input embedding and
+        the embeddings for seq_out through the model.
+        4. seq_out is updated with the newly generated token.
+        5. Repeat this until the maximum sequence length is reached.
+        """
+        # Initialize sequence with <SOS> token
         batch_size, max_seq_len = target_words.size()
-        sos_token = torch.full((batch_size, 1), char_to_idx['<sos>'], dtype=torch.long, device=device)
-        decoder_input = embedding(sos_token)
+        sos_token = torch.full(
+            (batch_size, 1),
+            char_to_idx['<sos>'],
+            dtype=torch.long,
+            device=device
+        )
+
+        # Initial decoder input is just <SOS>
         seq_out = sos_token
+        decoder_input = embedding(seq_out)
 
-        # Cache encoder output
-        src_pos = pos_enc(input_emb)
-        src_mask = model.generate_square_subsequent_mask(input_emb.size(1)).to(device)
-        memory = model.encoder(src_pos, mask=src_mask, is_causal=True)
-        # print(f"Memory mean: {memory.mean().item()}, std: {memory.std().item()}")
-
-        done = torch.zeros(batch_size, dtype=torch.bool, device=device)
-        for t in range(max_seq_len - 1):
+        # Generate sequence autoregressively
+        for t in range(max_seq_len - 1):  # -1 because we start with <SOS>
+            # Add positional encoding
+            src_pos = pos_enc(input_emb)
             tgt_pos = pos_enc(decoder_input)
+
+            # Create masks
+            src_mask = model.generate_square_subsequent_mask(input_emb.size(1)).to(device)
             tgt_mask = model.generate_square_subsequent_mask(decoder_input.size(1)).to(device)
-            output_emb = model.decoder(tgt_pos, memory, tgt_mask=tgt_mask, tgt_is_causal=True)
+
+            # Forward pass
+            output_emb = model(
+                src=src_pos,
+                tgt=tgt_pos,
+                src_mask=src_mask,
+                tgt_mask=tgt_mask,
+                src_is_causal=True,
+                tgt_is_causal=True
+            )
+
+            # Decode to vocabulary space
             output_logits = decoder(output_emb[:, -1:, :])
             if t > 0:  # Prevent <sos> after first token
                 output_logits[:, :, char_to_idx['<sos>']] = -float('inf')
-            y_hat = output_logits.argmax(dim=-1)
-            # print(f"Step {t}: Top 5 logits {torch.topk(output_logits[0, 0], 5).values.tolist()}, " "indices {torch.topk(output_logits[0, 0], 5).indices.tolist()}")
 
+            # Get predicted token
+            y_hat = output_logits.argmax(dim=-1)
+
+            # Append to sequence
             seq_out = torch.cat([seq_out, y_hat], dim=1)
-            decoder_input = embedding(seq_out)
-            done |= (y_hat.squeeze(-1) == char_to_idx['<eos>'])
-            if done.all():
+            decoder_input = embedding(seq_out)  # Update decoder input
+
+            # Check for <EOS> token to potentially break early
+            if (y_hat == char_to_idx['<eos>']).all():
                 break
 
+        # Calculate losses
         output_emb = embedding(seq_out)
         output_logits = decoder(output_emb)
+
         mse_loss = mse_criterion(output_emb, target_emb[:, :seq_out.size(1)])
-        ce_loss = ce_criterion(output_logits.view(-1, num_tokens), target_words[:, :seq_out.size(1)].view(-1))
-        total_mse_loss += mse_loss.item()
-        total_ce_loss += ce_loss.item()
+        ce_loss = ce_criterion(
+            output_logits.view(-1, num_tokens),
+            target_words[:, :seq_out.size(1)].contiguous().view(-1)
+        )
+
+        # Update metrics
+        avg_mse_loss += mse_loss.item()
+        avg_ce_loss += ce_loss.item()
         total_batches += 1
 
-        output_text, expected_text = decode_output(output_logits, target_words)
-        total_correct += compare_outputs(output_text, expected_text)
-        total_samples += len(output_text)
-        last_output_text, last_expected_text = output_text, expected_text
+        with torch.no_grad():
+            output_text, expected_text = decode_output(output_logits, target_words)
+            total_correct += compare_outputs(output_text, expected_text)
+            total_samples += len(output_text)
 
-    rand_idx = torch.randint(0, len(last_output_text), (min(10, len(last_output_text)),)).tolist()
+    # Display the decoded outputs only for the last step of each epoch
+    rand_idx = [_.item() for _ in torch.randint(0, len(output_text), (min(10, len(output_text)),))]
     for i in rand_idx:
-        print(f"Val Output:   \"{last_output_text[i]}\"")
-        print(f"Val Expected: \"{last_expected_text[i]}\"")
-        print("----" * 40)
+        out_ = output_text[i]
+        exp_ = expected_text[i]
+        print(f"Val Output:   \"{out_}\"")
+        print(f"Val Expected: \"{exp_}\"")
+        print("----"*40)
 
-    return total_mse_loss / total_batches, total_ce_loss / total_batches, total_correct / total_samples
+        # Calculate metrics
+        epoch_accuracy = (total_correct / total_samples) * 100.0
+        print(f"Validation Accuracy ({epoch}): {epoch_accuracy}")
+
+        return avg_mse_loss / total_batches, avg_ce_loss / total_batches, epoch_accuracy
 
 
 if not skip_training:
@@ -347,7 +393,7 @@ if not skip_training:
     train_acc_list = np.array(train_acc_list)
     val_mse_loss_list = np.array(val_mse_loss_list)
     val_ce_loss_list = np.array(val_ce_loss_list)
-    val_acc_list = np.array(val_acc_list)*100
+    val_acc_list = np.array(val_acc_list)
 
     print("Final accuracy")
     print(f"Train: {train_acc_list[-1]:1.2f}")
