@@ -8,7 +8,7 @@ from positional_encoding import PositionalEncoding
 from pig_latin_sentences import PigLatinSentences
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-skip_training = False
+skip_training = True
 skip_validation = True
 
 # Parameters
@@ -294,30 +294,30 @@ def validate(epoch):
         seq_out = sos_token
         decoder_input = embedding(seq_out)
 
+        # Cache encoder output
+        src_pos = pos_enc(input_emb)
+        src_mask = model.generate_square_subsequent_mask(input_emb.size(1)).to(device)
+        memory = model.encoder(src_pos, mask=src_mask, is_causal=True)
+        print(f"Memory mean: {memory.mean().item()}, std: {memory.std().item()}")
+
         # Generate sequence autoregressively
         for t in range(max_seq_len - 1):  # -1 because we start with <SOS>
-            # Add positional encoding
-            src_pos = pos_enc(input_emb)
+            # Add positional encodings
             tgt_pos = pos_enc(decoder_input)
 
             # Create masks
-            src_mask = model.generate_square_subsequent_mask(input_emb.size(1)).to(device)
             tgt_mask = model.generate_square_subsequent_mask(decoder_input.size(1)).to(device)
 
             # Forward pass
-            output_emb = model(
-                src=src_pos,
-                tgt=tgt_pos,
-                src_mask=src_mask,
+            output_emb = model.decoder(
+                tgt_pos,
+                memory,
                 tgt_mask=tgt_mask,
-                src_is_causal=True,
-                tgt_is_causal=True
+                tgt_is_causal=True,
             )
 
             # Decode to vocabulary space
             output_logits = decoder(output_emb[:, -1:, :])
-            if t > 0:  # Prevent <sos> after first token
-                output_logits[:, :, char_to_idx['<sos>']] = -float('inf')
 
             # Get predicted token
             y_hat = output_logits.argmax(dim=-1)
@@ -325,10 +325,6 @@ def validate(epoch):
             # Append to sequence
             seq_out = torch.cat([seq_out, y_hat], dim=1)
             decoder_input = embedding(seq_out)  # Update decoder input
-
-            # Check for <EOS> token to potentially break early
-            if (y_hat == char_to_idx['<eos>']).all():
-                break
 
         # Calculate losses
         output_emb = embedding(seq_out)
