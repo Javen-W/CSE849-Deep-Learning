@@ -1,3 +1,4 @@
+from torch import cuda
 from torch.nn.utils.rnn import pad_sequence
 from tqdm import trange, tqdm
 import torch
@@ -15,8 +16,8 @@ skip_validation = True
 num_tokens = 30
 emb_dim = 100
 batch_size = 32
-lr = 0.0001
-num_epochs = 10
+lr = 0.001
+num_epochs = 50
 num_workers = 0
 
 # Character to integer mapping
@@ -133,6 +134,7 @@ model = nn.Transformer(
     num_decoder_layers=2,
     dim_feedforward=128,
     batch_first=True,
+    dropout=0.1,
 )
 model = model.to(device)
 
@@ -356,10 +358,12 @@ def validate(epoch):
         print("----"*40)
 
         # Calculate metrics
-        epoch_accuracy = (total_correct / total_samples) * 100.0
-        print(f"Validation Accuracy ({epoch}): {epoch_accuracy}")
+        avg_mse = avg_mse_loss / total_batches
+        avg_ce = avg_ce_loss / total_batches
+        accuracy = (total_correct / total_samples) * 100.0 if total_samples > 0 else 0.0
+        print(f"Validation MSE: {avg_mse:.4f}, CE: {avg_ce:.4f}, Accuracy: {accuracy:.2f}%")
 
-        return avg_mse_loss / total_batches, avg_ce_loss / total_batches, epoch_accuracy
+        return avg_mse, avg_ce, accuracy
 
 
 if not skip_training:
@@ -456,7 +460,6 @@ decoder.eval()
 # Validate
 if skip_validation:  # (Skipped during training loop)
     val_mse_loss, val_ce_loss, val_acc = validate(epoch=0)
-    print(val_mse_loss, val_ce_loss, val_acc * 100)
 
 """
 # Generate predictions
