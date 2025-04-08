@@ -259,7 +259,7 @@ def train_one_epoch(epoch):
         avg_mse = avg_mse_loss / total_batches
         avg_ce = avg_ce_loss / total_batches
         accuracy = (total_correct / total_samples) * 100.0 if total_samples > 0 else 0.0
-        print(f"Validation MSE: {avg_mse:.4f}, CE: {avg_ce:.4f}, Accuracy: {accuracy:.2f}%")
+        print(f"Training MSE: {avg_mse:.4f}, CE: {avg_ce:.4f}, Accuracy: {accuracy:.2f}%")
 
         return avg_mse, avg_ce, accuracy
 
