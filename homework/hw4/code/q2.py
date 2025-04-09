@@ -418,7 +418,7 @@ def validate(epoch):
     # Progress scheduler
     scheduler.step(avg_ce)
 
-    return avg_mse, avg_ce, accuracy, word_acc
+    return avg_mse, avg_ce, accuracy
 
 if not skip_training:
     for epoch in trange(n_epochs):
@@ -430,7 +430,7 @@ if not skip_training:
 
         # Validate
         if not skip_validation:
-            val_mse_loss, val_ce_loss, val_acc, _ = validate(epoch)
+            val_mse_loss, val_ce_loss, val_acc = validate(epoch)
         else:
             val_mse_loss, val_ce_loss, val_acc = 0.0, 0.0, 0.0
         val_mse_loss_list.append(val_mse_loss)
@@ -577,4 +577,7 @@ test_predictions = predict_test_set()
 # Save predictions
 with open('results/q2_test.txt', 'w') as f:
     for pred in test_predictions:
+        # Remove <SOS> and <EOS>
+        pred = pred.replace("<sos>", "")
+        pred = pred.split("<eos>")[0] if "<eos>" in pred else pred
         f.write(f"{pred}\n")
