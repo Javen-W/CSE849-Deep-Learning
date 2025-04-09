@@ -24,6 +24,7 @@ n_encoder_layers = 2
 n_decoder_layers = 2
 dim_feedforward = 128
 dropout = 0.1
+batch_first = False
 
 # Character to integer mapping
 alphabets = "abcdefghijklmnopqrstuvwxyz"
@@ -48,33 +49,18 @@ for char, idx in char_to_idx.items():
 @torch.no_grad()
 def decode_output(output, target_words, is_seq_out=False):
     if is_seq_out:
-        out_words = output.detach().cpu().numpy()  # seq_out: (batch_size, seq_len)
+        out_words = output.detach().cpu().numpy()  # seq_out: (seq_len, batch_size)
     else:
-        out_words = output.argmax(dim=-1).detach().cpu().numpy()  # logits: (batch_size, seq_len, vocab_size)
+        out_words = output.argmax(dim=-1).detach().cpu().numpy()  # logits: (seq_len, batch_size, vocab_size)
     target_words = target_words.detach().cpu().numpy()
     out_decoded, exp_decoded = [], []
-
-    for i in range(out_words.shape[0]):  # Iterate over batch
-        # Decode output sequence
-        out_seq = []
-        for idx in out_words[i]:
-            if idx == pad_idx:
-                continue
-            out_seq.append(idx_to_char[idx])
-            if idx == eos_idx:
-                break
-        out_decoded.append("".join(out_seq))
-
-        # Decode expected sequence
-        exp_seq = []
-        for idx in target_words[i]:
-            if idx == pad_idx:
-                continue
-            exp_seq.append(idx_to_char[idx])
-            if idx == eos_idx:
-                break
-        exp_decoded.append("".join(exp_seq))
-
+    pad_pos = char_to_idx['<pad>']
+    for i in range(output.size(1)):
+        out_str = "".join([idx_to_char[idx] for idx in out_words[:, i] if idx != pad_pos])
+        if "<eos>" in out_str:
+            out_str = out_str.split("<eos>")[0] + "<eos>"
+        out_decoded.append(out_str)
+        exp_decoded.append("".join([idx_to_char[idx] for idx in target_words[:, i] if idx != pad_pos]))
     return out_decoded, exp_decoded
 
 def compare_outputs(output_text, expected_text):
@@ -106,8 +92,8 @@ def collate_fn(batch):
     eng_batch, pig_batch = zip(*batch)
 
     # Pad sequences
-    eng_padded = pad_sequence(eng_batch, batch_first=True, padding_value=char_to_idx['<pad>']).to(device)
-    pig_padded = pad_sequence(pig_batch, batch_first=True, padding_value=char_to_idx['<pad>']).to(device)
+    eng_padded = pad_sequence(eng_batch, batch_first=batch_first, padding_value=char_to_idx['<pad>']).to(device)
+    pig_padded = pad_sequence(pig_batch, batch_first=batch_first, padding_value=char_to_idx['<pad>']).to(device)
 
     # Embed sequences
     input_sequence = embedding(eng_padded)
@@ -151,7 +137,7 @@ model = nn.Transformer(
     num_encoder_layers=n_encoder_layers,
     num_decoder_layers=n_decoder_layers,
     dim_feedforward=dim_feedforward,
-    batch_first=True,
+    batch_first=batch_first,
     dropout=dropout,
 )
 model = model.to(device)
@@ -228,15 +214,16 @@ def train_one_epoch(epoch):
 
         # Add positional encoding
         src_pos = pos_enc(input_emb)
-        tgt_input = target_emb[:, :-1]  # All but last token
-        tgt_output = target_words[:, 1:]  # All but first token
+        tgt_input = target_emb[:-1, :]  # All but last token
+        tgt_output = target_words[1:, :]  # All but first token
         tgt_pos = pos_enc(tgt_input)
 
         # Create masks
-        src_mask = model.generate_square_subsequent_mask(src_pos.size(1)).to(device)
-        tgt_mask = model.generate_square_subsequent_mask(tgt_pos.size(1)).to(device)
+        src_mask = model.generate_square_subsequent_mask(src_pos.size(0)).to(device)
+        tgt_mask = model.generate_square_subsequent_mask(tgt_pos.size(0)).to(device)
 
         # Scheduled sampling
+        """
         prob = max(0.0, min(0.7, (epoch - 5) * 0.02))  # Starts at epoch 6
         if torch.rand(1).item() < prob:
             temp_tgt_pos = pos_enc(tgt_input)
@@ -245,6 +232,7 @@ def train_one_epoch(epoch):
             next_token = temp_logits.argmax(dim=-1)
             tgt_input = embedding(next_token)
         tgt_pos = pos_enc(tgt_input)
+        """
 
         # Forward pass
         output_emb = model(
@@ -260,10 +248,10 @@ def train_one_epoch(epoch):
         output_logits = decoder(output_emb)
 
         # Calculate the losses
-        mse_loss = mse_criterion(output_emb, tgt_input)  # Aligns naturally
+        mse_loss = mse_criterion(output_emb, tgt_input)
         ce_loss = ce_criterion(
             output_logits.view(-1, n_tokens),
-            tgt_output.contiguous().view(-1)
+            tgt_output.view(-1),
         )
 
         # Update the model parameters
@@ -328,13 +316,13 @@ def validate(epoch):
         5. Repeat this until the maximum sequence length is reached.
         """
         # Initialize sequence with <SOS> token
-        batch_size, max_seq_len = target_words.size()
-        sos_token = torch.full((batch_size, 1), char_to_idx['<sos>'], device=device)
+        max_seq_len, batch_size = target_words.size()
+        sos_token = torch.full((1, batch_size), char_to_idx['<sos>'], device=device)
         seq_out = sos_token
 
         # Cache encoder output
         src_pos = pos_enc(input_emb)
-        src_mask = model.generate_square_subsequent_mask(input_emb.size(1)).to(device)
+        src_mask = model.generate_square_subsequent_mask(input_emb.size(0)).to(device)
         memory = model.encoder(src_pos, mask=src_mask, is_causal=False)
 
         # Generate sequence autoregressively
@@ -342,7 +330,7 @@ def validate(epoch):
             # Prepare decoder input
             decoder_input = embedding(seq_out)
             tgt_pos = pos_enc(decoder_input)
-            tgt_mask = model.generate_square_subsequent_mask(tgt_pos.size(1)).to(device)
+            tgt_mask = model.generate_square_subsequent_mask(tgt_pos.size(0)).to(device)
 
             # Forward pass
             output_emb = model.decoder(
@@ -353,22 +341,23 @@ def validate(epoch):
             )
 
             # Decode to vocabulary space
-            output_logits = decoder(output_emb[:, -1:, :])
+            output_logits = decoder(output_emb[-1:, :, :])
 
             # Get predicted token
             y_hat = output_logits.argmax(dim=-1)
 
             # Append to sequence
-            seq_out = torch.cat([seq_out, y_hat], dim=1)
+            seq_out = torch.cat([seq_out, y_hat], dim=0)
 
         # Calculate losses
         output_emb = embedding(seq_out)
         output_logits = decoder(output_emb)
 
-        mse_loss = mse_criterion(output_emb, target_emb[:, :seq_out.size(1)])
+        mse_loss = mse_criterion(
+            output_emb, target_emb[:seq_out.size(0), :]
+        )
         ce_loss = ce_criterion(
-            output_logits.view(-1, n_tokens),
-            target_words[:, :seq_out.size(1)].contiguous().view(-1)
+            output_logits.view(-1, n_tokens), target_words[:seq_out.size(0), :].contiguous().view(-1)
         )
 
         # Update metrics
