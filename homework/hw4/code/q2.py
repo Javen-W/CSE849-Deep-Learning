@@ -32,19 +32,22 @@ char_to_idx['<sos>'] = idx + 1
 char_to_idx['<eos>'] = idx + 2
 char_to_idx['<pad>'] = idx + 3
 
+pad_idx = char_to_idx['<pad>']
+eos_idx = char_to_idx['<eos>']
+
 # reverse, integer to character mapping
 idx_to_char = {}
 for char, idx in char_to_idx.items():
     idx_to_char[idx] = char
 
 @torch.no_grad()
-def decode_output(output_logits, expected_words):
-    out_words = output_logits.argmax(dim=-1).detach().cpu().numpy()  # (batch_size, seq_len)
-    expected_words = expected_words.detach().cpu().numpy()  # (batch_size, seq_len)
-    out_decoded = []
-    exp_decoded = []
-    pad_idx = char_to_idx['<pad>']
-    eos_idx = char_to_idx['<eos>']
+def decode_output(target_words, output_logits=None, output_seq=None):
+    if output_logits:
+        out_words = output_logits.argmax(dim=-1).detach().cpu().numpy()  # (batch_size, seq_len)
+    else:
+        out_words = output_seq.detach().cpu().numpy()
+    expected_words = target_words.detach().cpu().numpy()  # (batch_size, seq_len)
+    out_decoded, exp_decoded = [], []
 
     for i in range(out_words.shape[0]):  # Iterate over batch
         # Decode output sequence
@@ -242,7 +245,7 @@ def train_one_epoch(epoch):
         total_batches += 1
 
         with torch.no_grad():
-            output_text, expected_text = decode_output(output_logits, target_words)
+            output_text, expected_text = decode_output(output_logits=output_logits, target_words=target_words)
             total_correct += compare_outputs(output_text, expected_text)
             total_samples += len(output_text)
 
@@ -347,7 +350,7 @@ def validate(epoch):
         total_batches += 1
 
         with torch.no_grad():
-            output_text, expected_text = decode_output(output_logits, target_words)
+            output_text, expected_text = decode_output(output_seq=seq_out, target_words=target_words)
             total_correct += compare_outputs(output_text, expected_text)
             total_samples += len(output_text)
 
