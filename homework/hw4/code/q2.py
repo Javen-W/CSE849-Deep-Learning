@@ -15,9 +15,8 @@ skip_validation = False
 # Hyperparameters
 batch_size = 64
 lr = 0.001
-n_epochs = 1
+n_epochs = 20
 n_workers = 0
-
 n_tokens = 30
 emb_dim = 100
 n_head = 2
@@ -238,24 +237,14 @@ def train_one_epoch(epoch):
         tgt_mask = model.generate_square_subsequent_mask(tgt_pos.size(1)).to(device)
 
         # Scheduled sampling
-        """
-        prob = max(0, min(0.7, (epoch - 5) * 0.02))  # Starts at epoch 6
-        # prob = min(0.7, epoch * 0.02)
+        prob = max(0.0, min(0.7, (epoch - 5) * 0.02))  # Starts at epoch 6
         if torch.rand(1).item() < prob:
-            # Temporary forward pass to get predictions
             temp_tgt_pos = pos_enc(tgt_input)
-            temp_output_emb = model(
-                src=src_pos,
-                tgt=temp_tgt_pos,
-                src_mask=model.generate_square_subsequent_mask(src_pos.size(1)).to(device),
-                tgt_mask=model.generate_square_subsequent_mask(temp_tgt_pos.size(1)).to(device),
-                src_is_causal=False,
-                tgt_is_causal=True,
-            )
+            temp_output_emb = model(src=src_pos, tgt=temp_tgt_pos, src_mask=src_mask, tgt_mask=tgt_mask)
             temp_logits = decoder(temp_output_emb)
-            next_token = temp_logits.argmax(dim=-1)  # No slicing here to match tgt_input length
-            tgt_input = embedding(next_token)  # Shape: (batch_size, seq_len)
-        """
+            next_token = temp_logits.argmax(dim=-1)
+            tgt_input = embedding(next_token)
+        tgt_pos = pos_enc(tgt_input)
 
         # Forward pass
         output_emb = model(
