@@ -298,34 +298,25 @@ def validate(epoch):
         """
         # Initialize sequence with <SOS> token
         batch_size, max_seq_len = target_words.size()
-        sos_token = torch.full(
-            (batch_size, 1),
-            char_to_idx['<sos>'],
-            dtype=torch.long,
-            device=device
-        )
-
-        # Initial decoder input is just <SOS>
+        sos_token = torch.full((batch_size, 1), char_to_idx['<sos>'], device=device)
         seq_out = sos_token
-        decoder_input = embedding(seq_out)
 
         # Cache encoder output
         src_pos = pos_enc(input_emb)
         src_mask = model.generate_square_subsequent_mask(input_emb.size(1)).to(device)
-        memory = model.encoder(src_pos, mask=src_mask, is_causal=True)
+        memory = model.encoder(src_pos, mask=src_mask, is_causal=False)
 
         # Generate sequence autoregressively
         for t in range(max_seq_len - 1):  # -1 because we start with <SOS>
-            # Add positional encodings
+            # Prepare decoder input
+            decoder_input = embedding(seq_out)
             tgt_pos = pos_enc(decoder_input)
-
-            # Create masks
-            tgt_mask = model.generate_square_subsequent_mask(decoder_input.size(1)).to(device)
+            tgt_mask = model.generate_square_subsequent_mask(tgt_pos.size(1)).to(device)
 
             # Forward pass
             output_emb = model.decoder(
-                tgt_pos,
-                memory,
+                tgt=tgt_pos,
+                memory=memory,
                 tgt_mask=tgt_mask,
                 tgt_is_causal=True,
             )
@@ -338,7 +329,6 @@ def validate(epoch):
 
             # Append to sequence
             seq_out = torch.cat([seq_out, y_hat], dim=1)
-            decoder_input = embedding(seq_out)  # Update decoder input
 
         # Calculate losses
         output_emb = embedding(seq_out)
