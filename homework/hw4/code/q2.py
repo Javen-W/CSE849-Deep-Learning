@@ -92,18 +92,20 @@ def collate_fn(batch):
     output_padded is the output_sequence padded to the maximum sequence
     length in the batch. This is raw text, not embeddings.
     """
+    # Extract raw sequences
     eng_batch, pig_batch = zip(*batch)
 
-    # Pad sequences
+    # Prepare input_sequence
     eng_padded = pad_sequence(eng_batch, batch_first=batch_first, padding_value=char_to_idx['<pad>']).to(device)
-    pig_padded = pad_sequence(pig_batch, batch_first=batch_first, padding_value=char_to_idx['<pad>']).to(device)
-
-    # Embed sequences
     input_sequence = embedding(eng_padded)
-    output_sequence = embedding(pig_padded)
-    output_padded = pig_padded
 
-    return input_sequence, output_sequence, output_padded
+    if pig_batch[0] is not None:
+        # Prepare output_sequence
+        pig_padded = pad_sequence(pig_batch, batch_first=batch_first, padding_value=char_to_idx['<pad>']).to(device)
+        output_sequence = embedding(pig_padded)
+        return input_sequence, output_sequence, pig_padded
+    else:
+        return input_sequence
 
 def word_accuracy(output_text, expected_text):
     total_words = 0

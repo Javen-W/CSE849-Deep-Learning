@@ -32,7 +32,7 @@ class PigLatinSentences(torch.utils.data.Dataset):
         # append <sos> and <eos> tokens, convert them to indices using char_to_idx, and return the indices.
         eng_word_idx = torch.tensor(self.sos + [self.char_to_idx[c] for c in self.english_sentences[idx]] + self.eos)
         if self.split == "test":
-            return eng_word_idx
+            return eng_word_idx, None
         else:
             pig_latin_word_idx = torch.tensor(
                 self.sos + [self.char_to_idx[c] for c in self.pig_latin_sentences[idx]] + self.eos)
