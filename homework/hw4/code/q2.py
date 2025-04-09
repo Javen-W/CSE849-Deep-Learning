@@ -255,7 +255,7 @@ def train_one_epoch(epoch):
         ce_loss = ce_criterion(output_logits.view(-1, n_tokens), tgt_output.view(-1))
 
         # Update the model parameters
-        total_loss = 0.1 * mse_loss + ce_loss
+        total_loss = 1.0 * mse_loss + ce_loss
         total_loss.backward()
         torch.nn.utils.clip_grad_norm_(params, max_norm=1.0)
         optimizer.step()
@@ -368,9 +368,9 @@ def validate(epoch):
 
         with torch.no_grad():
             output_text, expected_text = decode_output(
-                output=seq_out,
+                output=logits,
                 target_words=target_words,
-                is_seq_out=True,
+                is_seq_out=False,
             )
             total_correct += compare_outputs(output_text, expected_text)
             total_samples += len(output_text)
