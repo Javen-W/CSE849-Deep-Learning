@@ -41,12 +41,12 @@ for char, idx in char_to_idx.items():
     idx_to_char[idx] = char
 
 @torch.no_grad()
-def decode_output(target_words, output_logits=None, output_seq=None):
-    if output_logits:
-        out_words = output_logits.argmax(dim=-1).detach().cpu().numpy()  # (batch_size, seq_len)
+def decode_output(output, target_words, is_seq_out=False):
+    if is_seq_out:
+        out_words = output.detach().cpu().numpy()  # seq_out: (batch_size, seq_len)
     else:
-        out_words = output_seq.detach().cpu().numpy()
-    expected_words = target_words.detach().cpu().numpy()  # (batch_size, seq_len)
+        out_words = output.argmax(dim=-1).detach().cpu().numpy()  # logits: (batch_size, seq_len, vocab_size)
+    target_words = target_words.detach().cpu().numpy()
     out_decoded, exp_decoded = [], []
 
     for i in range(out_words.shape[0]):  # Iterate over batch
@@ -62,7 +62,7 @@ def decode_output(target_words, output_logits=None, output_seq=None):
 
         # Decode expected sequence
         exp_seq = []
-        for idx in expected_words[i]:
+        for idx in target_words[i]:
             if idx == pad_idx:
                 continue
             exp_seq.append(idx_to_char[idx])
@@ -251,7 +251,11 @@ def train_one_epoch(epoch):
         total_batches += 1
 
         with torch.no_grad():
-            output_text, expected_text = decode_output(output_logits=output_logits, target_words=target_words)
+            output_text, expected_text = decode_output(
+                output=output_logits,
+                target_words=target_words,
+                is_seq_out=False,
+            )
             total_correct += compare_outputs(output_text, expected_text)
             total_samples += len(output_text)
 
@@ -346,7 +350,11 @@ def validate(epoch):
         total_batches += 1
 
         with torch.no_grad():
-            output_text, expected_text = decode_output(output_seq=seq_out, target_words=target_words)
+            output_text, expected_text = decode_output(
+                output=seq_out,
+                target_words=target_words,
+                is_seq_out=True,
+            )
             total_correct += compare_outputs(output_text, expected_text)
             total_samples += len(output_text)
 
