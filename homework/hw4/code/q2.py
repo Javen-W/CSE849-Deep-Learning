@@ -316,6 +316,7 @@ def validate(epoch):
         max_seq_len, batch_size = target_words.size()
         sos_token = torch.full((1, batch_size), char_to_idx['<sos>'], device=device)
         seq_out = sos_token
+        logits_list = []  # Store logits for each step
 
         # Cache encoder output
         src_pos = pos_enc(input_emb)
@@ -338,7 +339,8 @@ def validate(epoch):
             )
 
             # Decode to vocabulary space
-            output_logits = decoder(output_emb[-1:, :, :])
+            output_logits = decoder(output_emb[-1:, :, :]) # (1, batch_size, n_tokens)
+            logits_list.append(output_logits)  # Store logits for CE loss
 
             # Get predicted token
             y_hat = output_logits.argmax(dim=-1)
@@ -346,12 +348,15 @@ def validate(epoch):
             # Append to sequence
             seq_out = torch.cat([seq_out, y_hat], dim=0)
 
-        # Calculate losses
+        # Compute losses
         output_emb = embedding(seq_out)
-        output_logits = decoder(output_emb)
-
-        mse_loss = mse_criterion(output_emb, target_emb)
-        ce_loss = ce_criterion(output_logits.view(-1, n_tokens), target_words.view(-1))
+        mse_loss = mse_criterion(output_emb, target_emb[:seq_out.size(0), :, :])
+        # Concatenate logits and targets for CE loss
+        logits = torch.cat(logits_list, dim=0)  # (seq_len-1, batch_size, n_tokens)
+        ce_loss = ce_criterion(
+            logits.view(-1, n_tokens),
+            target_words[1:seq_out.size(0), :].contiguous().view(-1)  # Align with logits length
+        )
 
         # Update metrics
         avg_mse_loss += mse_loss.item()
