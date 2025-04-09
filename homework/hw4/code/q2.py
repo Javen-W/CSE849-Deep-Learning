@@ -10,14 +10,14 @@ from pig_latin_sentences import PigLatinSentences
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 skip_training = False
-skip_validation = True
+skip_validation = False
 
 # Parameters
 num_tokens = 30
-emb_dim = 100
-batch_size = 32
+emb_dim = 200
+batch_size = 64
 lr = 0.001
-num_epochs = 1
+num_epochs = 50
 num_workers = 0
 
 # Character to integer mapping
@@ -142,10 +142,10 @@ test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, s
 # TODO: Create your Transformer model
 model = nn.Transformer(
     d_model=emb_dim,
-    nhead=2,
-    num_encoder_layers=2,
-    num_decoder_layers=2,
-    dim_feedforward=128,
+    nhead=4, # 2,
+    num_encoder_layers=4, #2,
+    num_decoder_layers=4, # 2,
+    dim_feedforward=256, # 128,
     batch_first=True,
     dropout=0.1,
 )
@@ -174,7 +174,7 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     optimizer,
     mode='min',
     factor=0.5,
-    patience=10,
+    patience=5,
 )
 
 # Set up your loss functions
