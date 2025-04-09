@@ -249,13 +249,10 @@ def train_one_epoch(epoch):
 
         # Calculate the losses
         mse_loss = mse_criterion(output_emb, tgt_input)
-        ce_loss = ce_criterion(
-            output_logits.view(-1, n_tokens),
-            tgt_output.view(-1),
-        )
+        ce_loss = ce_criterion(output_logits.view(-1, n_tokens), tgt_output.view(-1))
 
         # Update the model parameters
-        total_loss = 0.1 * mse_loss + ce_loss
+        total_loss = mse_loss + ce_loss
         total_loss.backward()
         torch.nn.utils.clip_grad_norm_(params, max_norm=1.0)
         optimizer.step()
@@ -353,12 +350,8 @@ def validate(epoch):
         output_emb = embedding(seq_out)
         output_logits = decoder(output_emb)
 
-        mse_loss = mse_criterion(
-            output_emb, target_emb[:seq_out.size(0), :]
-        )
-        ce_loss = ce_criterion(
-            output_logits.view(-1, n_tokens), target_words[:seq_out.size(0), :].contiguous().view(-1)
-        )
+        mse_loss = mse_criterion(output_emb, target_emb)
+        ce_loss = ce_criterion(output_logits.view(-1, n_tokens), target_words.view(-1))
 
         # Update metrics
         avg_mse_loss += mse_loss.item()
