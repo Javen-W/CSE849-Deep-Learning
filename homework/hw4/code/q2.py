@@ -117,6 +117,28 @@ def word_accuracy(output_text, expected_text):
         correct_words += sum(1 for o, e in zip(out_words, exp_words) if o == e)
     return correct_words / total_words * 100 if total_words > 0 else 0
 
+def write_metrics_to_file(epoch, train_mse, train_ce, train_acc, val_mse, val_ce, val_acc, final=False):
+    # Determine mode: 'w' for first write only, 'a' for appending
+    mode = 'w' if epoch == 0 and not final else 'a'
+    with open('results/q2_history.txt', mode) as _f:
+        if final:
+            # Write final metrics
+            _f.write("\nFinal accuracies\n")
+            _f.write(f"Train: {train_acc:1.2f}\n")
+            _f.write(f"Val: {val_acc:1.2f}\n")
+            _f.write("\nFinal losses\n")
+            _f.write(f"Train MSE: {train_mse:1.3f}\n")
+            _f.write(f"Train CE: {train_ce:1.3f}\n")
+            _f.write(f"Val MSE: {val_mse:1.3f}\n")
+            _f.write(f"Val CE: {val_ce:1.3f}\n")
+        else:
+            # Write per-epoch metrics
+            _f.write(
+                f"[{epoch + 1}/{n_epochs}] Training MSE: {train_mse:.4f}, CE: {train_ce:.4f}, Accuracy: {train_acc:.2f}%\n")
+            _f.write(
+                f"[{epoch + 1}/{n_epochs}] Validation MSE: {val_mse:.4f}, CE: {val_ce:.4f}, Accuracy: {val_acc:.2f}%")
+            _f.write("\n")
+
 # Create Datasets
 train_dataset = PigLatinSentences("train", char_to_idx)
 val_dataset = PigLatinSentences("val", char_to_idx)
@@ -390,15 +412,13 @@ def validate(epoch):
     avg_mse = avg_mse_loss / total_batches
     avg_ce = avg_ce_loss / total_batches
     accuracy = (total_correct / total_samples) * 100.0 if total_samples > 0 else 0.0
-    print(f"Validation MSE: {avg_mse:.4f}, CE: {avg_ce:.4f}, Accuracy: {accuracy:.2f}%")
     word_acc = word_accuracy(output_text, expected_text)
-    print(f"Word-level Accuracy: {word_acc:.2f}%")
+    print(f"Validation MSE: {avg_mse:.4f}, CE: {avg_ce:.4f}, Accuracy: {accuracy:.2f}, Word-level Accuracy: {word_acc:.2f}%")
 
     # Progress scheduler
     scheduler.step(avg_ce)
 
-    return avg_mse, avg_ce, accuracy
-
+    return avg_mse, avg_ce, accuracy, word_acc
 
 if not skip_training:
     for epoch in trange(n_epochs):
@@ -409,12 +429,25 @@ if not skip_training:
         train_acc_list.append(train_acc)
 
         # Validate
-        val_mse_loss, val_ce_loss, val_acc = 0.0, 0.0, 0.0
         if not skip_validation:
-            val_mse_loss, val_ce_loss, val_acc = validate(epoch)
+            val_mse_loss, val_ce_loss, val_acc, _ = validate(epoch)
+        else:
+            val_mse_loss, val_ce_loss, val_acc = 0.0, 0.0, 0.0
         val_mse_loss_list.append(val_mse_loss)
         val_ce_loss_list.append(val_ce_loss)
         val_acc_list.append(val_acc)
+
+        # Write metrics to file
+        write_metrics_to_file(
+            epoch=epoch,
+            train_mse=train_mse_loss,
+            train_ce=train_ce_loss,
+            train_acc=train_acc,
+            val_mse=val_mse_loss,
+            val_ce=val_ce_loss,
+            val_acc=val_acc,
+            final=False,
+        )
 
     # Save model parameters
     save_dict = {
@@ -432,6 +465,7 @@ if not skip_training:
     val_ce_loss_list = np.array(val_ce_loss_list)
     val_acc_list = np.array(val_acc_list)
 
+    # Print and write final metrics
     print("Final accuracy")
     print(f"Train: {train_acc_list[-1]:1.2f}")
     print(f"Val: {val_acc_list[-1]:1.2f}")
@@ -439,6 +473,17 @@ if not skip_training:
     print(f"Train MSE: {train_mse_loss_list[-1]:1.3f}")
     print(f"Train CE: {train_ce_loss_list[-1]:1.3f}")
     print(f"Val MSE: {val_mse_loss_list[-1]:1.3f}")
+
+    write_metrics_to_file(
+        epoch=0,  # Not used for final write
+        train_mse=train_mse_loss_list[-1],
+        train_ce=train_ce_loss_list[-1],
+        train_acc=train_acc_list[-1],
+        val_mse=val_mse_loss_list[-1],
+        val_ce=val_ce_loss_list[-1],
+        val_acc=val_acc_list[-1],
+        final=True
+    )
 
     fig, axs = plt.subplots(2, 2, figsize=(10, 10))
 
