@@ -531,7 +531,7 @@ def predict_test_set():
     embedding.eval()
     decoder.eval()
 
-    for input_emb, _, _ in tqdm(test_loader, leave=False, desc="Generating test predictions"):
+    for input_emb in tqdm(test_loader, leave=False, desc="Generating test predictions"):
         max_seq_len, batch_size = input_emb.size(0), input_emb.size(1)  # (seq_len, batch_size, emb_dim)
         sos_token = torch.full((1, batch_size), char_to_idx['<sos>'], device=device)  # (1, batch_size)
         seq_out = sos_token
@@ -566,11 +566,6 @@ checkpoint = torch.load("results/q2_model.pt", weights_only=True)
 model.load_state_dict(checkpoint["transformer"])
 decoder.load_state_dict(checkpoint["decoder"])
 embedding.load_state_dict(checkpoint["embedding"])
-
-# Set models to evaluation mode
-embedding.eval()
-model.eval()
-decoder.eval()
 
 # Validate
 if skip_validation:  # (Skipped during training loop)
