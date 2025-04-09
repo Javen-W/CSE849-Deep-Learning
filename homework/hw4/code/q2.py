@@ -12,10 +12,13 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 skip_training = False
 skip_validation = False
 
+# Seed
+torch.manual_seed(777)
+
 # Hyperparameters
 batch_size = 64
-lr = 0.001
-n_epochs = 20
+lr = 0.002
+n_epochs = 50
 n_workers = 0
 n_tokens = 30
 emb_dim = 100
@@ -165,7 +168,7 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     optimizer,
     mode='min',
     factor=0.5,
-    patience=5,
+    patience=3,
 )
 
 # Set up your loss functions
@@ -224,10 +227,10 @@ def train_one_epoch(epoch):
 
         # Scheduled sampling
         """
-        prob = max(0.0, min(0.7, (epoch - 5) * 0.02))  # Starts at epoch 6
+        prob = max(0.0, min(0.9, (epoch - 5) * 0.02))  # Up to 90% by epoch 50
         if torch.rand(1).item() < prob:
             temp_tgt_pos = pos_enc(tgt_input)
-            temp_output_emb = model(src=src_pos, tgt=temp_tgt_pos, src_mask=src_mask, tgt_mask=tgt_mask)
+            temp_output_emb = model(src=src_pos, tgt=temp_tgt_pos, src_mask=None, tgt_mask=tgt_mask)
             temp_logits = decoder(temp_output_emb)
             next_token = temp_logits.argmax(dim=-1)
             tgt_input = embedding(next_token)
@@ -252,7 +255,7 @@ def train_one_epoch(epoch):
         ce_loss = ce_criterion(output_logits.view(-1, n_tokens), tgt_output.view(-1))
 
         # Update the model parameters
-        total_loss = mse_loss + ce_loss
+        total_loss = 0.1 * mse_loss + ce_loss
         total_loss.backward()
         torch.nn.utils.clip_grad_norm_(params, max_norm=1.0)
         optimizer.step()
