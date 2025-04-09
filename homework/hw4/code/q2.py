@@ -12,13 +12,19 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 skip_training = False
 skip_validation = False
 
-# Parameters
-num_tokens = 30
-emb_dim = 200
+# Hyperparameters
 batch_size = 64
 lr = 0.001
-num_epochs = 50
-num_workers = 0
+n_epochs = 1
+n_workers = 0
+
+n_tokens = 30
+emb_dim = 100
+n_head = 2
+n_encoder_layers = 2
+n_decoder_layers = 2
+dim_feedforward = 128
+dropout = 0.1
 
 # Character to integer mapping
 alphabets = "abcdefghijklmnopqrstuvwxyz"
@@ -128,33 +134,33 @@ test_dataset = PigLatinSentences("test", char_to_idx)
 
 # TODO: Define your embedding
 embedding = nn.Embedding(
-    num_embeddings=num_tokens,
+    num_embeddings=n_tokens,
     embedding_dim=emb_dim,
     padding_idx=char_to_idx['<pad>'],
 )
 embedding = embedding.to(device)
 
 # Create DataLoaders
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn,num_workers=num_workers)
-val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn,num_workers=num_workers)
-test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn,num_workers=num_workers)
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn, num_workers=n_workers)
+val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=n_workers)
+test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=n_workers)
 
 # TODO: Create your Transformer model
 model = nn.Transformer(
     d_model=emb_dim,
-    nhead=4, # 2,
-    num_encoder_layers=4, #2,
-    num_decoder_layers=4, # 2,
-    dim_feedforward=256, # 128,
+    nhead=n_head,
+    num_encoder_layers=n_encoder_layers,
+    num_decoder_layers=n_decoder_layers,
+    dim_feedforward=dim_feedforward,
     batch_first=True,
-    dropout=0.1,
+    dropout=dropout,
 )
 model = model.to(device)
 
 # TODO: Create your decoder from embedding space to the vocabulary space
 decoder = nn.Linear(
     in_features=emb_dim,
-    out_features=num_tokens,
+    out_features=n_tokens,
 )
 nn.init.xavier_uniform_(decoder.weight)
 nn.init.zeros_(decoder.bias)
@@ -201,7 +207,7 @@ def train_one_epoch(epoch):
     embedding.train()
     decoder.train()
 
-    for input_emb, target_emb, target_words in tqdm(train_loader, leave=False, desc=f"Train epoch {epoch+1}/{num_epochs}"):
+    for input_emb, target_emb, target_words in tqdm(train_loader, leave=False, desc=f"Train epoch {epoch+1}/{n_epochs}"):
         """
         TODO:
         1. Get the input and target embeddings
@@ -267,7 +273,7 @@ def train_one_epoch(epoch):
         # Calculate the losses
         mse_loss = mse_criterion(output_emb, tgt_input)  # Aligns naturally
         ce_loss = ce_criterion(
-            output_logits.view(-1, num_tokens),
+            output_logits.view(-1, n_tokens),
             tgt_output.contiguous().view(-1)
         )
 
@@ -320,7 +326,7 @@ def validate(epoch):
     embedding.eval()
     decoder.eval()
 
-    for input_emb, target_emb, target_words in tqdm(val_loader, leave=False, desc=f"Val epoch {epoch+1}/{num_epochs}"):
+    for input_emb, target_emb, target_words in tqdm(val_loader, leave=False, desc=f"Val epoch {epoch+1}/{n_epochs}"):
         """
         TODO:
         1. Similar to the training loop, set up the embeddings for the
@@ -372,7 +378,7 @@ def validate(epoch):
 
         mse_loss = mse_criterion(output_emb, target_emb[:, :seq_out.size(1)])
         ce_loss = ce_criterion(
-            output_logits.view(-1, num_tokens),
+            output_logits.view(-1, n_tokens),
             target_words[:, :seq_out.size(1)].contiguous().view(-1)
         )
 
@@ -414,7 +420,7 @@ def validate(epoch):
 
 
 if not skip_training:
-    for epoch in trange(num_epochs):
+    for epoch in trange(n_epochs):
         # Train
         train_mse_loss, train_ce_loss, train_acc = train_one_epoch(epoch)
         train_mse_loss_list.append(train_mse_loss)
@@ -452,31 +458,31 @@ if not skip_training:
 
     fig, axs = plt.subplots(2, 2, figsize=(10, 10))
 
-    axs[0, 0].plot(np.arange(num_epochs), train_ce_loss_list + train_mse_loss_list, label="Train")
-    axs[0, 0].plot(np.arange(num_epochs), val_ce_loss_list + val_mse_loss_list, label="Val")
+    axs[0, 0].plot(np.arange(n_epochs), train_ce_loss_list + train_mse_loss_list, label="Train")
+    axs[0, 0].plot(np.arange(n_epochs), val_ce_loss_list + val_mse_loss_list, label="Val")
     axs[0, 0].legend()
     axs[0, 0].set_title("Total Loss")
     axs[0, 0].set_xlabel("Epoch")
     axs[0, 0].set_ylabel("Loss")
     axs[0, 0].set_yscale("log")
 
-    axs[0, 1].plot(np.arange(num_epochs), train_acc_list, label="Train")
-    axs[0, 1].plot(np.arange(num_epochs), val_acc_list, label="Val")
+    axs[0, 1].plot(np.arange(n_epochs), train_acc_list, label="Train")
+    axs[0, 1].plot(np.arange(n_epochs), val_acc_list, label="Val")
     axs[0, 1].legend()
     axs[0, 1].set_title("Accuracy")
     axs[0, 1].set_xlabel("Epoch")
     axs[0, 1].set_ylabel("Accuracy (%)")
 
-    axs[1, 0].plot(np.arange(num_epochs), train_mse_loss_list, label="Train")
-    axs[1, 0].plot(np.arange(num_epochs), val_mse_loss_list, label="Val")
+    axs[1, 0].plot(np.arange(n_epochs), train_mse_loss_list, label="Train")
+    axs[1, 0].plot(np.arange(n_epochs), val_mse_loss_list, label="Val")
     axs[1, 0].legend()
     axs[1, 0].set_title("MSE Loss")
     axs[1, 0].set_xlabel("Epoch")
     axs[1, 0].set_ylabel("Loss")
     axs[1, 0].set_yscale("log")
 
-    axs[1, 1].plot(np.arange(num_epochs), train_ce_loss_list, label="Train")
-    axs[1, 1].plot(np.arange(num_epochs), val_ce_loss_list, label="Val")
+    axs[1, 1].plot(np.arange(n_epochs), train_ce_loss_list, label="Train")
+    axs[1, 1].plot(np.arange(n_epochs), val_ce_loss_list, label="Val")
     axs[1, 1].legend()
     axs[1, 1].set_title("CE Loss")
     axs[1, 1].set_xlabel("Epoch")
