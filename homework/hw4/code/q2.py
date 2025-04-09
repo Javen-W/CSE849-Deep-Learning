@@ -222,35 +222,57 @@ def train_one_epoch(epoch):
         optimizer.zero_grad()
 
         # Add positional encoding
-        input_pos = pos_enc(input_emb)
-        target_pos = pos_enc(target_emb)
+        src_pos = pos_enc(input_emb)
+        tgt_input = target_emb[:, :-1]  # All but last token
+        tgt_output = target_words[:, 1:]  # All but first token
+        tgt_pos = pos_enc(tgt_input)
 
         # Create masks
-        src_mask = model.generate_square_subsequent_mask(input_emb.size(1)).to(device)
-        tgt_mask = model.generate_square_subsequent_mask(target_emb.size(1)).to(device)
+        src_mask = model.generate_square_subsequent_mask(src_pos.size(1)).to(device)
+        tgt_mask = model.generate_square_subsequent_mask(tgt_pos.size(1)).to(device)
+
+        # Scheduled sampling
+        """
+        prob = max(0, min(0.7, (epoch - 5) * 0.02))  # Starts at epoch 6
+        # prob = min(0.7, epoch * 0.02)
+        if torch.rand(1).item() < prob:
+            # Temporary forward pass to get predictions
+            temp_tgt_pos = pos_enc(tgt_input)
+            temp_output_emb = model(
+                src=src_pos,
+                tgt=temp_tgt_pos,
+                src_mask=model.generate_square_subsequent_mask(src_pos.size(1)).to(device),
+                tgt_mask=model.generate_square_subsequent_mask(temp_tgt_pos.size(1)).to(device),
+                src_is_causal=False,
+                tgt_is_causal=True,
+            )
+            temp_logits = decoder(temp_output_emb)
+            next_token = temp_logits.argmax(dim=-1)  # No slicing here to match tgt_input length
+            tgt_input = embedding(next_token)  # Shape: (batch_size, seq_len)
+        """
 
         # Forward pass
         output_emb = model(
-            src=input_pos,
-            tgt=target_pos,
+            src=src_pos,
+            tgt=tgt_pos,
             src_mask=src_mask,
             tgt_mask=tgt_mask,
-            src_is_causal=True,
-            tgt_is_causal=True
+            src_is_causal=False,
+            tgt_is_causal=True,
         )
 
         # Decode to vocabulary space
         output_logits = decoder(output_emb)
 
         # Calculate the losses
-        mse_loss = mse_criterion(output_emb, target_emb)
+        mse_loss = mse_criterion(output_emb, tgt_input)  # Aligns naturally
         ce_loss = ce_criterion(
             output_logits.view(-1, num_tokens),
-            target_words.view(-1)
+            tgt_output.contiguous().view(-1)
         )
 
         # Update the model parameters
-        total_loss = mse_loss + ce_loss
+        total_loss = 0.1 * mse_loss + ce_loss
         total_loss.backward()
         torch.nn.utils.clip_grad_norm_(params, max_norm=1.0)
         optimizer.step()
