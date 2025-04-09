@@ -233,14 +233,14 @@ def train_one_epoch(epoch):
         tgt_pos = pos_enc(tgt_input)
 
         # Create masks
-        src_mask = model.generate_square_subsequent_mask(src_pos.size(1)).to(device)
+        # src_mask = model.generate_square_subsequent_mask(src_pos.size(1)).to(device)
         tgt_mask = model.generate_square_subsequent_mask(tgt_pos.size(1)).to(device)
 
         # Scheduled sampling
         prob = max(0.0, min(0.7, (epoch - 5) * 0.02))  # Starts at epoch 6
         if torch.rand(1).item() < prob:
             temp_tgt_pos = pos_enc(tgt_input)
-            temp_output_emb = model(src=src_pos, tgt=temp_tgt_pos, src_mask=src_mask, tgt_mask=tgt_mask)
+            temp_output_emb = model(src=src_pos, tgt=temp_tgt_pos, tgt_mask=tgt_mask)
             temp_logits = decoder(temp_output_emb)
             next_token = temp_logits.argmax(dim=-1)
             tgt_input = embedding(next_token)
@@ -250,9 +250,9 @@ def train_one_epoch(epoch):
         output_emb = model(
             src=src_pos,
             tgt=tgt_pos,
-            src_mask=src_mask,
+            # src_mask=src_mask,
             tgt_mask=tgt_mask,
-            src_is_causal=False,
+            # src_is_causal=False,
             tgt_is_causal=True,
         )
 
@@ -267,7 +267,7 @@ def train_one_epoch(epoch):
         )
 
         # Update the model parameters
-        total_loss = 0.1 * mse_loss + ce_loss
+        total_loss = 1.0 * mse_loss + ce_loss
         total_loss.backward()
         torch.nn.utils.clip_grad_norm_(params, max_norm=1.0)
         optimizer.step()
@@ -334,8 +334,9 @@ def validate(epoch):
 
         # Cache encoder output
         src_pos = pos_enc(input_emb)
-        src_mask = model.generate_square_subsequent_mask(input_emb.size(1)).to(device)
-        memory = model.encoder(src_pos, mask=src_mask, is_causal=False)
+        # src_mask = model.generate_square_subsequent_mask(input_emb.size(1)).to(device)
+        # memory = model.encoder(src_pos, mask=src_mask, is_causal=False)
+        memory = model.encoder(src_pos, mask=None, is_causal=False)
 
         # Generate sequence autoregressively
         for t in range(max_seq_len - 1):  # -1 because we start with <SOS>
