@@ -111,6 +111,16 @@ def collate_fn(batch):
 
     return input_sequence, output_sequence, output_padded
 
+def word_accuracy(output_text, expected_text):
+    total_words = 0
+    correct_words = 0
+    for out, exp in zip(output_text, expected_text):
+        out_words = out.replace("<sos>", "").split("<eos>")[0].split()
+        exp_words = exp.replace("<sos>", "").split("<eos>")[0].split()
+        total_words += len(exp_words)
+        correct_words += sum(1 for o, e in zip(out_words, exp_words) if o == e)
+    return correct_words / total_words * 100 if total_words > 0 else 0
+
 # Create Datasets
 train_dataset = PigLatinSentences("train", char_to_idx)
 val_dataset = PigLatinSentences("val", char_to_idx)
@@ -372,6 +382,8 @@ def validate(epoch):
     avg_ce = avg_ce_loss / total_batches
     accuracy = (total_correct / total_samples) * 100.0 if total_samples > 0 else 0.0
     print(f"Validation MSE: {avg_mse:.4f}, CE: {avg_ce:.4f}, Accuracy: {accuracy:.2f}%")
+    word_acc = word_accuracy(output_text, expected_text)
+    print(f"Word-level Accuracy: {word_acc:.2f}%")
 
     # Progress scheduler
     scheduler.step(avg_ce)
