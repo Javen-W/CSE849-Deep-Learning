@@ -415,9 +415,12 @@ if not skip_training:
         val_acc_list.append(val_acc)
 
     # Save model parameters
-    torch.save(model.state_dict(), "results/q2_model.pt")
-    torch.save(decoder.state_dict(), "results/q2_decoder.pt")
-    torch.save(embedding.state_dict(), "results/q2_embedding.pt")
+    save_dict = {
+        "transformer": model.state_dict(),
+        "decoder": decoder.state_dict(),
+        "embedding": embedding.state_dict()
+    }
+    torch.save(save_dict, "results/q2_model.pt")
 
     # Report & Plot
     train_mse_loss_list = np.array(train_mse_loss_list)
@@ -477,12 +480,45 @@ if not skip_training:
 @torch.no_grad()
 def predict_test_set():
     predictions = []
+    model.eval()
+    embedding.eval()
+    decoder.eval()
+
+    for input_emb, _, _ in tqdm(test_loader, leave=False, desc="Generating test predictions"):
+        max_seq_len, batch_size = input_emb.size(0), input_emb.size(1)  # (seq_len, batch_size, emb_dim)
+        sos_token = torch.full((1, batch_size), char_to_idx['<sos>'], device=device)  # (1, batch_size)
+        seq_out = sos_token
+
+        # Cache encoder output
+        src_pos = pos_enc(input_emb)
+        memory = model.encoder(src_pos, mask=None, is_causal=False)
+
+        # Generate sequence autoregressively
+        for t in range(max_seq_len - 1):  # -1 because we start with <sos>
+            decoder_input = embedding(seq_out)
+            tgt_pos = pos_enc(decoder_input)
+            tgt_mask = model.generate_square_subsequent_mask(tgt_pos.size(0)).to(device)
+            output_emb = model.decoder(
+                tgt=tgt_pos,
+                memory=memory,
+                tgt_mask=tgt_mask,
+                tgt_is_causal=True,
+            )
+            output_logits = decoder(output_emb[-1:, :, :])  # (1, batch_size, n_tokens)
+            y_hat = output_logits.argmax(dim=-1)  # (1, batch_size)
+            seq_out = torch.cat([seq_out, y_hat], dim=0)  # (seq_len_so_far+1, batch_size)
+
+        # Decode the generated sequences
+        output_text, _ = decode_output(seq_out, seq_out, is_seq_out=True)  # We don't need target_words
+        predictions.extend(output_text)
+
     return predictions
 
-# Load the best checkpoints
-model.load_state_dict(torch.load("results/q2_model.pt", weights_only=True))
-decoder.load_state_dict(torch.load("results/q2_decoder.pt", weights_only=True))
-embedding.load_state_dict(torch.load("results/q2_embedding.pt", weights_only=True))
+# Load the best checkpoint
+checkpoint = torch.load("results/q2_model.pt", weights_only=True)
+model.load_state_dict(checkpoint["transformer"])
+decoder.load_state_dict(checkpoint["decoder"])
+embedding.load_state_dict(checkpoint["embedding"])
 
 # Set models to evaluation mode
 embedding.eval()
@@ -493,12 +529,10 @@ decoder.eval()
 if skip_validation:  # (Skipped during training loop)
     val_mse_loss, val_ce_loss, val_acc = validate(epoch=0)
 
-"""
 # Generate predictions
 test_predictions = predict_test_set()
 
-# Save predictions to q1_test.txt
+# Save predictions
 with open('results/q2_test.txt', 'w') as f:
     for pred in test_predictions:
         f.write(f"{pred}\n")
-"""
