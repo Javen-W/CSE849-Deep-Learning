@@ -160,6 +160,12 @@ optimizer = torch.optim.Adam(
     lr=lr,
     weight_decay=1e-4,
 )
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+    optimizer,
+    mode='min',
+    factor=0.5,
+    patience=10,
+)
 
 # Set up your loss functions
 mse_criterion = nn.MSELoss()
@@ -258,13 +264,13 @@ def train_one_epoch(epoch):
         print(f"Train Expected: \"{exp_}\"")
         print("----"*40)
 
-        # Calculate metrics
-        avg_mse = avg_mse_loss / total_batches
-        avg_ce = avg_ce_loss / total_batches
-        accuracy = (total_correct / total_samples) * 100.0 if total_samples > 0 else 0.0
-        print(f"Training MSE: {avg_mse:.4f}, CE: {avg_ce:.4f}, Accuracy: {accuracy:.2f}%")
+    # Calculate metrics
+    avg_mse = avg_mse_loss / total_batches
+    avg_ce = avg_ce_loss / total_batches
+    accuracy = (total_correct / total_samples) * 100.0 if total_samples > 0 else 0.0
+    print(f"Training MSE: {avg_mse:.4f}, CE: {avg_ce:.4f}, Accuracy: {accuracy:.2f}%")
 
-        return avg_mse, avg_ce, accuracy
+    return avg_mse, avg_ce, accuracy
 
 @torch.no_grad()
 def validate(epoch):
@@ -363,13 +369,16 @@ def validate(epoch):
         print(f"Val Expected: \"{exp_}\"")
         print("----"*40)
 
-        # Calculate metrics
-        avg_mse = avg_mse_loss / total_batches
-        avg_ce = avg_ce_loss / total_batches
-        accuracy = (total_correct / total_samples) * 100.0 if total_samples > 0 else 0.0
-        print(f"Validation MSE: {avg_mse:.4f}, CE: {avg_ce:.4f}, Accuracy: {accuracy:.2f}%")
+    # Calculate metrics
+    avg_mse = avg_mse_loss / total_batches
+    avg_ce = avg_ce_loss / total_batches
+    accuracy = (total_correct / total_samples) * 100.0 if total_samples > 0 else 0.0
+    print(f"Validation MSE: {avg_mse:.4f}, CE: {avg_ce:.4f}, Accuracy: {accuracy:.2f}%")
 
-        return avg_mse, avg_ce, accuracy
+    # Progress scheduler
+    scheduler.step(avg_ce)
+
+    return avg_mse, avg_ce, accuracy
 
 
 if not skip_training:
@@ -454,9 +463,9 @@ def predict_test_set():
     return predictions
 
 # Load the best checkpoints
-model.load_state_dict(torch.load("results/q2_model.pt"))
-decoder.load_state_dict(torch.load("results/q2_decoder.pt"))
-embedding.load_state_dict(torch.load("results/q2_embedding.pt"))
+model.load_state_dict(torch.load("results/q2_model.pt", weights_only=True))
+decoder.load_state_dict(torch.load("results/q2_decoder.pt", weights_only=True))
+embedding.load_state_dict(torch.load("results/q2_embedding.pt", weights_only=True))
 
 # Set models to evaluation mode
 embedding.eval()
