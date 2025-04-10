@@ -532,31 +532,49 @@ def predict_test_set():
     decoder.eval()
 
     for input_emb in tqdm(test_loader, leave=False, desc="Generating test predictions"):
-        max_seq_len, batch_size = input_emb.size(0), input_emb.size(1)  # (seq_len, batch_size, emb_dim)
+        # Initialize sequence with <SOS> token
+        max_seq_len, batch_size = input_emb.size(0) * 2, input_emb.size(1)  # (seq_len, batch_size, emb_dim)
         sos_token = torch.full((1, batch_size), char_to_idx['<sos>'], device=device)  # (1, batch_size)
         seq_out = sos_token
+        logits_list = []  # Store logits for each step
 
         # Cache encoder output
         src_pos = pos_enc(input_emb)
-        memory = model.encoder(src_pos, mask=None, is_causal=False)
+        src_mask = model.generate_square_subsequent_mask(input_emb.size(0)).to(device)
+        memory = model.encoder(src_pos, mask=src_mask, is_causal=False)
 
         # Generate sequence autoregressively
-        for t in range(max_seq_len - 1):  # -1 because we start with <sos>
+        for t in range(max_seq_len - 1):  # -1 because we start with <SOS>
+            # Prepare decoder input
             decoder_input = embedding(seq_out)
             tgt_pos = pos_enc(decoder_input)
             tgt_mask = model.generate_square_subsequent_mask(tgt_pos.size(0)).to(device)
+
+            # Forward pass
             output_emb = model.decoder(
                 tgt=tgt_pos,
                 memory=memory,
                 tgt_mask=tgt_mask,
                 tgt_is_causal=True,
             )
+
+            # Decode to vocabulary space
             output_logits = decoder(output_emb[-1:, :, :])  # (1, batch_size, n_tokens)
-            y_hat = output_logits.argmax(dim=-1)  # (1, batch_size)
-            seq_out = torch.cat([seq_out, y_hat], dim=0)  # (seq_len_so_far+1, batch_size)
+            logits_list.append(output_logits)  # Store logits for CE loss
+
+            # Get predicted token
+            y_hat = output_logits.argmax(dim=-1)
+
+            # Append to sequence
+            seq_out = torch.cat([seq_out, y_hat], dim=0)
 
         # Decode the generated sequences
-        output_text, _ = decode_output(seq_out, seq_out, is_seq_out=True)  # We don't need target_words
+        logits = torch.cat(logits_list, dim=0)  # (seq_len-1, batch_size, n_tokens)
+        output_text, _ = decode_output(
+            output=logits,
+            target_words=seq_out,
+            is_seq_out=False,
+        )
         predictions.extend(output_text)
 
     return predictions
