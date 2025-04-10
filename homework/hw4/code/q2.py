@@ -279,7 +279,7 @@ def train_one_epoch(epoch):
         ce_loss = ce_criterion(output_logits.view(-1, n_tokens), tgt_output.view(-1))
 
         # Update the model parameters
-        total_loss = 1.0 * mse_loss + ce_loss
+        total_loss = 0.1 * mse_loss + ce_loss
         total_loss.backward()
         torch.nn.utils.clip_grad_norm_(params, max_norm=1.0)
         optimizer.step()

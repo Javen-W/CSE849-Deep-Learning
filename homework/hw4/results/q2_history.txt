@@ -1,0 +1,110 @@
+[1/50] Training MSE: 0.4556, CE: 0.2542, Accuracy: 30.85%
+[1/50] Validation MSE: 0.1196, CE: 0.6941, Accuracy: 85.59%
+[2/50] Training MSE: 0.1642, CE: 0.0418, Accuracy: 58.39%
+[2/50] Validation MSE: 0.0715, CE: 0.5911, Accuracy: 88.57%
+[3/50] Training MSE: 0.1205, CE: 0.0336, Accuracy: 65.01%
+[3/50] Validation MSE: 0.0345, CE: 0.2396, Accuracy: 94.50%
+[4/50] Training MSE: 0.1054, CE: 0.0308, Accuracy: 67.66%
+[4/50] Validation MSE: 0.0279, CE: 0.2633, Accuracy: 94.53%
+[5/50] Training MSE: 0.0991, CE: 0.0292, Accuracy: 69.60%
+[5/50] Validation MSE: 0.0203, CE: 0.1760, Accuracy: 96.12%
+[6/50] Training MSE: 0.0963, CE: 0.0284, Accuracy: 70.26%
+[6/50] Validation MSE: 0.0202, CE: 0.2502, Accuracy: 94.23%
+[7/50] Training MSE: 0.0950, CE: 0.0279, Accuracy: 70.67%
+[7/50] Validation MSE: 0.0180, CE: 0.1660, Accuracy: 96.07%
+[8/50] Training MSE: 0.0943, CE: 0.0269, Accuracy: 71.63%
+[8/50] Validation MSE: 0.0174, CE: 0.2035, Accuracy: 94.14%
+[9/50] Training MSE: 0.0936, CE: 0.0264, Accuracy: 72.18%
+[9/50] Validation MSE: 0.0166, CE: 0.1596, Accuracy: 96.59%
+[10/50] Training MSE: 0.0933, CE: 0.0262, Accuracy: 72.61%
+[10/50] Validation MSE: 0.0156, CE: 0.1083, Accuracy: 97.28%
+[11/50] Training MSE: 0.0931, CE: 0.0254, Accuracy: 73.15%
+[11/50] Validation MSE: 0.0152, CE: 0.1439, Accuracy: 96.31%
+[12/50] Training MSE: 0.0929, CE: 0.0253, Accuracy: 73.17%
+[12/50] Validation MSE: 0.0149, CE: 0.1670, Accuracy: 95.38%
+[13/50] Training MSE: 0.0928, CE: 0.0247, Accuracy: 73.81%
+[13/50] Validation MSE: 0.0143, CE: 0.1156, Accuracy: 97.33%
+[14/50] Training MSE: 0.0922, CE: 0.0245, Accuracy: 74.06%
+[14/50] Validation MSE: 0.0145, CE: 0.1353, Accuracy: 96.64%
+[15/50] Training MSE: 0.0882, CE: 0.0164, Accuracy: 81.94%
+[15/50] Validation MSE: 0.0126, CE: 0.0616, Accuracy: 98.61%
+[16/50] Training MSE: 0.0884, CE: 0.0178, Accuracy: 80.37%
+[16/50] Validation MSE: 0.0115, CE: 0.0631, Accuracy: 98.38%
+[17/50] Training MSE: 0.0882, CE: 0.0180, Accuracy: 80.37%
+[17/50] Validation MSE: 0.0121, CE: 0.0808, Accuracy: 98.20%
+[18/50] Training MSE: 0.0879, CE: 0.0179, Accuracy: 80.25%
+[18/50] Validation MSE: 0.0120, CE: 0.0813, Accuracy: 98.26%
+[19/50] Training MSE: 0.0878, CE: 0.0176, Accuracy: 80.69%
+[19/50] Validation MSE: 0.0115, CE: 0.0661, Accuracy: 98.25%
+[20/50] Training MSE: 0.0853, CE: 0.0137, Accuracy: 84.88%
+[20/50] Validation MSE: 0.0115, CE: 0.0386, Accuracy: 99.11%
+[21/50] Training MSE: 0.0856, CE: 0.0139, Accuracy: 84.57%
+[21/50] Validation MSE: 0.0108, CE: 0.0453, Accuracy: 98.98%
+[22/50] Training MSE: 0.0854, CE: 0.0142, Accuracy: 84.23%
+[22/50] Validation MSE: 0.0102, CE: 0.0422, Accuracy: 99.06%
+[23/50] Training MSE: 0.0854, CE: 0.0143, Accuracy: 83.94%
+[23/50] Validation MSE: 0.0105, CE: 0.0411, Accuracy: 99.10%
+[24/50] Training MSE: 0.0853, CE: 0.0143, Accuracy: 83.90%
+[24/50] Validation MSE: 0.0102, CE: 0.0507, Accuracy: 98.80%
+[25/50] Training MSE: 0.0838, CE: 0.0119, Accuracy: 86.56%
+[25/50] Validation MSE: 0.0097, CE: 0.0255, Accuracy: 99.40%
+[26/50] Training MSE: 0.0840, CE: 0.0121, Accuracy: 86.35%
+[26/50] Validation MSE: 0.0097, CE: 0.0273, Accuracy: 99.37%
+[27/50] Training MSE: 0.0839, CE: 0.0122, Accuracy: 86.23%
+[27/50] Validation MSE: 0.0096, CE: 0.0248, Accuracy: 99.43%
+[28/50] Training MSE: 0.0839, CE: 0.0123, Accuracy: 86.19%
+[28/50] Validation MSE: 0.0089, CE: 0.0252, Accuracy: 99.41%
+[29/50] Training MSE: 0.0839, CE: 0.0124, Accuracy: 85.98%
+[29/50] Validation MSE: 0.0095, CE: 0.0292, Accuracy: 99.33%
+[30/50] Training MSE: 0.0838, CE: 0.0123, Accuracy: 86.09%
+[30/50] Validation MSE: 0.0095, CE: 0.0346, Accuracy: 99.25%
+[31/50] Training MSE: 0.0838, CE: 0.0123, Accuracy: 86.10%
+[31/50] Validation MSE: 0.0095, CE: 0.0339, Accuracy: 99.27%
+[32/50] Training MSE: 0.0828, CE: 0.0110, Accuracy: 87.83%
+[32/50] Validation MSE: 0.0091, CE: 0.0236, Accuracy: 99.44%
+[33/50] Training MSE: 0.0830, CE: 0.0109, Accuracy: 87.68%
+[33/50] Validation MSE: 0.0093, CE: 0.0237, Accuracy: 99.49%
+[34/50] Training MSE: 0.0830, CE: 0.0112, Accuracy: 87.32%
+[34/50] Validation MSE: 0.0091, CE: 0.0235, Accuracy: 99.44%
+[35/50] Training MSE: 0.0830, CE: 0.0111, Accuracy: 87.52%
+[35/50] Validation MSE: 0.0091, CE: 0.0226, Accuracy: 99.44%
+[36/50] Training MSE: 0.0830, CE: 0.0111, Accuracy: 87.60%
+[36/50] Validation MSE: 0.0087, CE: 0.0239, Accuracy: 99.45%
+[37/50] Training MSE: 0.0830, CE: 0.0111, Accuracy: 87.40%
+[37/50] Validation MSE: 0.0088, CE: 0.0242, Accuracy: 99.46%
+[38/50] Training MSE: 0.0830, CE: 0.0113, Accuracy: 87.42%
+[38/50] Validation MSE: 0.0086, CE: 0.0225, Accuracy: 99.47%
+[39/50] Training MSE: 0.0830, CE: 0.0112, Accuracy: 87.46%
+[39/50] Validation MSE: 0.0087, CE: 0.0273, Accuracy: 99.38%
+[40/50] Training MSE: 0.0829, CE: 0.0113, Accuracy: 87.23%
+[40/50] Validation MSE: 0.0086, CE: 0.0213, Accuracy: 99.46%
+[41/50] Training MSE: 0.0830, CE: 0.0112, Accuracy: 87.35%
+[41/50] Validation MSE: 0.0087, CE: 0.0246, Accuracy: 99.38%
+[42/50] Training MSE: 0.0828, CE: 0.0113, Accuracy: 87.34%
+[42/50] Validation MSE: 0.0082, CE: 0.0291, Accuracy: 99.34%
+[43/50] Training MSE: 0.0829, CE: 0.0112, Accuracy: 87.42%
+[43/50] Validation MSE: 0.0085, CE: 0.0256, Accuracy: 99.38%
+[44/50] Training MSE: 0.0829, CE: 0.0112, Accuracy: 87.39%
+[44/50] Validation MSE: 0.0086, CE: 0.0250, Accuracy: 99.41%
+[45/50] Training MSE: 0.0823, CE: 0.0104, Accuracy: 88.21%
+[45/50] Validation MSE: 0.0086, CE: 0.0180, Accuracy: 99.51%
+[46/50] Training MSE: 0.0823, CE: 0.0104, Accuracy: 88.35%
+[46/50] Validation MSE: 0.0085, CE: 0.0197, Accuracy: 99.50%
+[47/50] Training MSE: 0.0824, CE: 0.0105, Accuracy: 88.27%
+[47/50] Validation MSE: 0.0085, CE: 0.0221, Accuracy: 99.44%
+[48/50] Training MSE: 0.0824, CE: 0.0104, Accuracy: 88.33%
+[48/50] Validation MSE: 0.0083, CE: 0.0212, Accuracy: 99.51%
+[49/50] Training MSE: 0.0824, CE: 0.0105, Accuracy: 88.32%
+[49/50] Validation MSE: 0.0081, CE: 0.0215, Accuracy: 99.49%
+[50/50] Training MSE: 0.0821, CE: 0.0101, Accuracy: 88.81%
+[50/50] Validation MSE: 0.0084, CE: 0.0182, Accuracy: 99.59%
+
+Final accuracies
+Train: 88.81
+Val: 99.59
+
+Final losses
+Train MSE: 0.082
+Train CE: 0.010
+Val MSE: 0.008
+Val CE: 0.018
