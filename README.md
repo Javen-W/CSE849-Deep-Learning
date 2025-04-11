@@ -10,7 +10,12 @@ This repository contains my coursework for CSE849, a graduate-level Deep Learnin
 
 **Tools**: PyTorch, NumPy, Matplotlib.
 
-**Results**: Achieved 97.5% test accuracy (hw0/results/accuracy.txt), demonstrating effective use of PyTorch for model training and evaluation.
+**Results**: Successfully fitted a linear model to the non-linear dataset, demonstrating effective use of PyTorch for model training and evaluation.
+
+![q2_plot](https://github.com/user-attachments/assets/07fff7b7-fde5-4ba9-9889-fc44de6e8483)
+
+![q3_plot](https://github.com/user-attachments/assets/8042ba73-e87c-44e6-8695-ca5fafa8b22f)
+
 
 **Key Skills**: PyTorch fundamentals, neural network implementation, NumPy data processing.
 
