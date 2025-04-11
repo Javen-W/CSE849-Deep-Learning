@@ -4,20 +4,19 @@ This repository contains my coursework for CSE849, a graduate-level Deep Learnin
 ## Projects
 
 ### Project 0: Familiarizing with PyTorch
-**Description**: Built a neural network to classify handwritten digits using the MNIST dataset, introducing PyTorch’s core functionality (hw0/CSE_849___Project_0.pdf).
+**Description**: Developed a PyTorch pipeline from scratch for a regression task, generating a synthetic dataset and training a linear model, then applied a multi-layer perceptron (MLP) to a provided dataset (`hw0/CSE_849___Project_0.pdf`).
 
-**Approach**: Implemented a multi-layer perceptron with PyTorch, using tensor operations and autograd for gradient computation. Preprocessed MNIST data with NumPy for normalization and batching. Trained with stochastic gradient descent.
+**Approach**: Created a custom Dataset class to generate synthetic data using the formula `y = αx + βe`, with random seed control for reproducibility. Built a DataLoader for efficient batching. Implemented a linear model with nn.Linear and Xavier initialization, trained with MSE loss and AdamW optimizer. For the provided data.pt dataset, trained an MLP with two hidden layers (`1D -> 10D -> 10D -> 1D`) using AdamW, visualizing predictions across multiple seeds.
 
 **Tools**: PyTorch, NumPy, Matplotlib.
 
-**Results**: Successfully fitted a linear model to the non-linear dataset, demonstrating effective use of PyTorch for model training and evaluation.
+**Results**: Achieved low training and validation MSE for the synthetic dataset, with visualized loss curves (`hw0/results/q2_plot.png`). For the provided dataset, tuned hyperparameters (batch size, learning rate) to optimize validation performance, with predictions plotted for seeds 1-5 (`hw0/results/q3_plot.png`).
 
 ![q2_plot](https://github.com/user-attachments/assets/07fff7b7-fde5-4ba9-9889-fc44de6e8483)
 
 ![q3_plot](https://github.com/user-attachments/assets/8042ba73-e87c-44e6-8695-ca5fafa8b22f)
 
-
-**Key Skills**: PyTorch fundamentals, neural network implementation, NumPy data processing.
+**Key Skills**: PyTorch fundamentals, PyTorch pipeline development, custom dataset creation, NumPy data generation, MLP implementation.
 
 ### Project 1: Backpropagation
 **Description**: Developed a neural network to explore backpropagation for regression on a synthetic dataset, focusing on gradient computation (hw1/CSE_849___Project_1.pdf).
