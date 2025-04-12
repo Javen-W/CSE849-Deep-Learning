@@ -85,7 +85,7 @@ This repository contains my coursework for CSE849, a graduate-level Deep Learnin
 **Libraries and Tools**:
 - NumPy: Applied for data preprocessing and computation, including synthetic data generation with noise in Project 0, gradient calculations for the spiral function in Project 1, image preprocessing in Project 2, and text indexing in Project 3.
 - torchvision: Employed for dataset loading (e.g., ImageFolder for composite images) and image transformations (e.g., normalization, augmentations) in Project 2, and data utilities in Project 0 and Project 3.
-- Matplotlib: Created visualizations like loss curves and prediction plots in Project 0 (e.g., q3_plot.png), trajectory plots for gradient descent in Project 1 (e.g., q1_plot.png), filter visualizations and activation bar plots in Project 2 (e.g., filters.png, activations.png), and loss curves and confusion matrices in Project 3 (e.g., q1_metrics.png).
+- Matplotlib: Created visualizations like loss curves and prediction plots in Project 0, trajectory plots for gradient descent in Project 1, filter visualizations and activation bar plots in Project 2, and loss curves and confusion matrices in Project 3.
 
 **NLP Capabilities**: Developed RNNs for review rating prediction using fine-tuned GloVe embeddings and Transformers for Pig Latin translation with learned character embeddings and positional encodings. Handled variable-length sequences with custom collation and autoregressive decoding, achieving strong performance in classification and translation tasks.
 
