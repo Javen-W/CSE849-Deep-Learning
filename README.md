@@ -67,7 +67,7 @@ This repository contains my coursework for CSE849, a graduate-level Deep Learnin
 
 **Approach**: For review rating prediction, implemented a 2-layer RNN in PyTorch with 50D hidden vectors, using fine-tuned 50D GloVe embeddings (`glove/modified_glove_50d.pt`). Processed variable-length reviews with a custom collate function to create packed sequences of embeddings. Fed RNN outputs to a linear classifier, trained with cross-entropy loss. For Pig Latin translation, built a Transformer with 2 encoder and 2 decoder layers, 2 attention heads, and 100D embeddings for a 30-character vocabulary (alphabets, space, `<SOS>`, `<EOS>`, `<PAD>`). Added positional encodings and trained with cross-entropy and MSE losses, using autoregressive decoding for inference. Saved checkpoints for both tasks.
 
-**Tools**: PyTorch, NumPy, NLTK, torchvision.
+**Tools**: PyTorch, NumPy, Matplotlib, Seaborn
 
 **Results**: For review rating, achieved high validation accuracy with clear loss curves and confusion matrices (`hw4/results/plots/`), and saved test predictions (`hw4/results/q1_test.txt`). For Pig Latin, generated accurate translations, with test outputs saved (`hw4/results/q2_test.txt`) and strong validation performance reported (>99.0%).
 
@@ -78,22 +78,20 @@ This repository contains my coursework for CSE849, a graduate-level Deep Learnin
 **Key Skills**: RNNs, Transformers, NLP, GloVe embeddings, PyTorch sequence modeling.
 
 ## Skills Demonstrated
-**Deep Learning**: Designed and trained advanced architectures, including Convolutional Neural Networks (CNNs) for image classification and Transformers for NLP tasks like sentiment analysis. Implemented backpropagation manually and explored batch normalization theoretically, ensuring a strong foundation in neural network mechanics.
+**Deep Learning**: Designed and trained advanced architectures, including Convolutional Neural Networks (CNNs) for robust image classification, Transformers for sequence-to-sequence translation, RNNs for text classification, and MLPs for regression tasks. Implemented gradient descent and backpropagation manually, and explored batch normalization theoretically, ensuring a strong foundation in neural network mechanics.
 
-**PyTorch Proficiency**: Leveraged PyTorch extensively to build, train, and evaluate models across all projects. Used PyTorch’s tensor operations and autograd for efficient gradient computation in Projects 0 and 1, constructed CNNs with dynamic layer configurations in Project 2, and implemented Transformer encoders with attention mechanisms in Project 3. Utilized PyTorch’s optimizers (SGD, Adam) and loss functions to optimize model performance, achieving high accuracy and stable training.
+**PyTorch Proficiency**: Leveraged PyTorch extensively to build, train, and evaluate models across all projects. Used PyTorch’s tensor operations and autograd to implement custom datasets and linear models in Project 0, developed custom Linear, ReLU, and MSELoss modules for gradient descent and backpropagation in Project 1, constructed CNNs with convolutional, batch normalization, and pooling layers in Project 2, and implemented RNNs with packed sequences and Transformers with multi-head attention and positional encodings in Project 3. Utilized PyTorch’s optimizers (SGD, Adam, AdamW) and loss functions (MSE, cross-entropy) to optimize model performance, achieving low errors and high accuracy.
 
 **Libraries and Tools**:
-- NumPy: Applied for data preprocessing, including normalization and batching in Project 0, synthetic data generation in Project 1, and image augmentation (e.g., random flips) in Project 2. Used NumPy arrays for efficient text tokenization in Project 3.
+- NumPy: Applied for data preprocessing and computation, including synthetic data generation with noise in Project 0, gradient calculations for the spiral function in Project 1, image preprocessing in Project 2, and text indexing in Project 3.
+- torchvision: Employed for dataset loading (e.g., ImageFolder for composite images) and image transformations (e.g., normalization, augmentations) in Project 2, and data utilities in Project 0 and Project 3.
+- Matplotlib: Created visualizations like loss curves and prediction plots in Project 0 (e.g., q3_plot.png), trajectory plots for gradient descent in Project 1 (e.g., q1_plot.png), filter visualizations and activation bar plots in Project 2 (e.g., filters.png, activations.png), and loss curves and confusion matrices in Project 3 (e.g., q1_metrics.png).
 
-- torchvision: Employed for dataset loading (e.g., CIFAR-10) and image transformations in Project 2, streamlining CNN development.
+**NLP Capabilities**: Developed RNNs for review rating prediction using fine-tuned GloVe embeddings and Transformers for Pig Latin translation with learned character embeddings and positional encodings. Handled variable-length sequences with custom collation and autoregressive decoding, achieving strong performance in classification and translation tasks.
 
-- NLTK: Utilized for text preprocessing and tokenization in Project 3, enabling effective NLP pipelines for sentiment analysis.
+**Technical Proficiency**: Combined theoretical insights (e.g., batch normalization derivations, analytical gradients) with practical implementation, building robust ML pipelines. Demonstrated ability to preprocess diverse data types (synthetic, spatial coordinates, composite images, text), mitigate biases like shortcut learning, and analyze models via visualizations, aligning with machine learning engineering demands.
 
-- Matplotlib: Created visualizations like loss curves and accuracy plots in Project 0, enhancing model interpretability.
 
-**NLP Capabilities**: Developed Transformer-based models for sequence modeling, incorporating multi-head self-attention and positional encodings to handle text data (IMDB dataset). Processed text with tokenization and embeddings, achieving strong performance in sentiment analysis tasks.
-
-**Technical Proficiency**: Combined theoretical insights (e.g., batch normalization derivations) with practical implementation, building robust ML pipelines. Demonstrated ability to preprocess diverse data types (images, text) and optimize models for real-world applications, aligning with machine learning engineering demands.
 
 
 
