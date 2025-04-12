@@ -1,6 +1,16 @@
 # CSE849: Deep Learning Coursework
 This repository contains my coursework for CSE849, a graduate-level Deep Learning course completed as part of my Master’s in Computer Science and Engineering. It includes four projects and one theoretical assignment, demonstrating my proficiency in designing, implementing, and analyzing deep learning models. The projects emphasize PyTorch, Convolutional Neural Networks (CNNs), Transformers, Natural Language Processing (NLP), and NumPy, showcasing my readiness for machine learning engineering roles.
 
+## Table of Contents
+
+- [Projects](#projects)
+  - [Project 0: Familiarizing with PyTorch](#project-0-familiarizing-with-pytorch)
+  - [Project 1: Backpropagation](#project-1-backpropagation)
+  - [Homework 2: Derivatives for Batch Normalization](#homework-2-derivatives-for-batch-normalization)
+  - [Project 2: Convolutional Neural Networks](#project-2-convolutional-neural-networks)
+  - [Project 3: Sequence Modeling](#project-3-sequence-modeling)
+- [Skills Demonstrated](#skills-demonstrated)
+
 ## Projects
 
 ### Project 0: Familiarizing with PyTorch
