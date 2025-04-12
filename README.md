@@ -37,9 +37,9 @@ This repository contains my coursework for CSE849, a graduate-level Deep Learnin
 
 
 ### Homework 2: Derivatives for Batch Normalization
-**Description**: Derived gradients for batch normalization to understand its role in stabilizing deep learning models (hw2/CSE_849___Project_2.pdf).
+**Description**: Derived gradients for batch normalization to understand its role in stabilizing deep learning models (`hw2/CSE 849 Deep Learning HW2.pdf`).
 
-**Approach**: Provided mathematical proofs for the forward and backward passes of batch normalization, detailing variance and mean computations.
+**Approach**: Provided mathematical proofs for the forward and backward passes of batch normalization by deriving each component. 
 
 **Tools**: None (theoretical assignment).
 
