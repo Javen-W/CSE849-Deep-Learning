@@ -63,15 +63,19 @@ This repository contains my coursework for CSE849, a graduate-level Deep Learnin
 **Key Skills**: CNN architecture design, PyTorch implementation, data augmentation, filter visualization, model analysis.
 
 ### Project 3: Sequence Modeling
-**Description**: Built a Transformer-based model for sentiment analysis on the IMDB dataset, addressing NLP challenges (hw4/CSE_849___Project_3.pdf).
+**Description**: Developed sequence models for two NLP tasks: predicting Yelp review ratings (1-5 stars) using an RNN and translating English to Pig Latin using a Transformer (`hw4/CSE_849___Project_3.pdf`).
 
-**Approach**: Implemented a Transformer encoder in PyTorch with multi-head self-attention and positional encodings. Preprocessed text with NumPy and tokenization to create word embeddings. Trained with cross-entropy loss.
+**Approach**: For review rating prediction, implemented a 2-layer RNN in PyTorch with 50D hidden vectors, using fine-tuned 50D GloVe embeddings (`glove/modified_glove_50d.pt`). Processed variable-length reviews with a custom collate function to create packed sequences of embeddings. Fed RNN outputs to a linear classifier, trained with cross-entropy loss. For Pig Latin translation, built a Transformer with 2 encoder and 2 decoder layers, 2 attention heads, and 100D embeddings for a 30-character vocabulary (alphabets, space, `<SOS>`, `<EOS>`, `<PAD>`). Added positional encodings and trained with cross-entropy and MSE losses, using autoregressive decoding for inference. Saved checkpoints for both tasks.
 
-**Tools**: PyTorch, NumPy, NLTK.
+**Tools**: PyTorch, NumPy, NLTK, torchvision.
 
-**Results**: Achieved 88.7% accuracy and 0.85 F1-score (hw4/results/metrics.txt), demonstrating robust sequence modeling for NLP tasks.
+**Results**: For review rating, achieved high validation accuracy with clear loss curves and confusion matrices (`hw4/results/plots/`), and saved test predictions (`hw4/results/q1_test.txt`). For Pig Latin, generated accurate translations, with test outputs saved (`hw4/results/q2_test.txt`) and strong validation performance reported (>99.0%).
 
-**Key Skills**: Transformers, NLP, sequence modeling, PyTorch.
+![q1_confusion_matrix](https://github.com/user-attachments/assets/ed908ddf-f07b-469a-8136-c5ef1ecf0d05)
+
+![q2_results](https://github.com/user-attachments/assets/c53dd04b-97c2-432a-ba5b-60463d83e7fc)
+
+**Key Skills**: RNNs, Transformers, NLP, GloVe embeddings, PyTorch sequence modeling.
 
 ## Skills Demonstrated
 **Deep Learning**: Designed and trained advanced architectures, including Convolutional Neural Networks (CNNs) for image classification and Transformers for NLP tasks like sentiment analysis. Implemented backpropagation manually and explored batch normalization theoretically, ensuring a strong foundation in neural network mechanics.
