@@ -56,9 +56,9 @@ This repository contains my coursework for CSE849, a graduate-level Deep Learnin
 
 **Results**: Achieved robust validation accuracy by mitigating shortcut learning, with test predictions saved (`hw3/results/q1_test.txt`). Visualized 16 first-layer filters as RGB images (`hw3/results/q2_filters/`) and plotted 96 bar plots of classwise activations (`hw3/results/q3_filters/`), revealing low-level edge detection in early layers and class-specific patterns in later layers.
 
-![q1_plots](https://github.com/user-attachments/assets/3e0c7b3d-386e-4f21-8e8c-02df31978840)
-
 ![filter_16](https://github.com/user-attachments/assets/93e550cd-b874-4f61-a2ca-81cacbbc0442)
+
+![q1_plots](https://github.com/user-attachments/assets/3e0c7b3d-386e-4f21-8e8c-02df31978840)
 
 **Key Skills**: CNN architecture design, PyTorch implementation, data augmentation, filter visualization, model analysis.
 
