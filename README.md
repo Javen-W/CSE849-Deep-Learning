@@ -48,15 +48,19 @@ This repository contains my coursework for CSE849, a graduate-level Deep Learnin
 **Key Skills**: Mathematical foundations of deep learning, batch normalization theory.
 
 ### Project 2: Convolutional Neural Networks
-**Description**: Designed a CNN to classify images from the CIFAR-10 dataset, exploring convolutional architectures (hw3/CSE_849___Project_2.pdf).
+**Description**: Implemented a 5-layer CNN to classify composite images (CIFAR-10 sub-image top-left, MNIST sub-image bottom-right) into 10 classes based on the CIFAR-10 label, avoiding shortcut learning from MNIST label correlations in the training set (`hw3/CSE_849___Project_2.pdf`).
 
-**Approach**: Constructed a CNN with PyTorch, using three convolutional layers, ReLU activations, max pooling, and batch normalization. Preprocessed images with NumPy for augmentation (e.g., random flips). Optimized with Adam.
+**Approach**: Designed a CNN in PyTorch with five convolutional layers (16, 32, 48, 64, 80 output channels), each followed by batch normalization, ReLU, and max pooling (except the last), plus adaptive average pooling and a linear layer (`128D → 10D`). Used torchvision’s ImageFolder for train/validation and a custom dataset for test. Applied preprocessing (random flips, normalization, and augmentations (GaussianNoise, RandomErasing). Trained with cross-entropy loss, tuning hyperparameters to focus on CIFAR-10 features. Visualized first-layer filters and computed classwise activation norms for the first and fifth layers to analyze filter behavior.
 
-**Tools**: PyTorch, NumPy, torchvision.
+**Tools**: PyTorch, NumPy, torchvision, Matplotlib.
 
-**Results**: Attained 82.3% test accuracy (hw3/results/accuracy_plot.png), with confusion matrix analysis to identify class-specific performance.
+**Results**: Achieved robust validation accuracy by mitigating shortcut learning, with test predictions saved (`hw3/results/q1_test.txt`). Visualized 16 first-layer filters as RGB images (`hw3/results/q2_filters/`) and plotted 96 bar plots of classwise activations (`hw3/results/q3_filters/`), revealing low-level edge detection in early layers and class-specific patterns in later layers.
 
-**Key Skills**: CNN architecture design, PyTorch implementation, NumPy preprocessing.
+![q1_plots](https://github.com/user-attachments/assets/3e0c7b3d-386e-4f21-8e8c-02df31978840)
+
+![filter_16](https://github.com/user-attachments/assets/93e550cd-b874-4f61-a2ca-81cacbbc0442)
+
+**Key Skills**: CNN architecture design, PyTorch implementation, data augmentation, filter visualization, model analysis.
 
 ### Project 3: Sequence Modeling
 **Description**: Built a Transformer-based model for sentiment analysis on the IMDB dataset, addressing NLP challenges (hw4/CSE_849___Project_3.pdf).
