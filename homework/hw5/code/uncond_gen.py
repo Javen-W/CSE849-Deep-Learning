@@ -10,23 +10,31 @@ plt.switch_backend("agg")
 from models import MLP
 from data import States
 
-plot_dir = "plots/unconditional_generation"
+plot_dir = "outputs/plots/unconditional_generation"
 os.makedirs(plot_dir, exist_ok=True)
 
-# training parameters
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-batch_size = None
-num_epochs = None
-lr = None
-weight_decay = None
+# Seed
+torch.manual_seed(777)
 
-mlp = None # create the denoiser model
-mlp.to(device)
-mse_loss = None # create the denoising (MSE) loss function
+# Training parameters
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+batch_size = 10_000
+num_epochs = 5_000
+lr = 0.001
+weight_decay = 1e-4
+
+# Create the denoiser model
+mlp = MLP(input_dim=3, output_dim=2, hidden_layers=[256, 256, 256, 256]).to(device)
+mse_loss = nn.MSELoss() # create the denoising (MSE) loss function
 
 # Create your optimizer and learning rate scheduler
-optimizer = None
-scheduler = None
+optimizer = torch.optim.Adam(mlp.parameters(), lr=lr, weight_decay=weight_decay)
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+    optimizer,
+    mode='min',
+    factor=0.5,
+    patience=3,
+)
 
 num_steps = 500
 dataset = States(num_steps=num_steps)
@@ -82,7 +90,7 @@ for e in trange(num_epochs):
 nll, z = sample(5000)
 dataset.show(z, os.path.join(plot_dir, "final.png"))
 np.save(os.path.join(plot_dir, "uncond_gen_samples.pt"), z)
-torch.save(mlp.state_dict(), "denoiser.pt")
+torch.save(mlp.state_dict(), "checkpoints/denoiser.pt")
 
 fig, axs = plt.subplots(1, 2, figsize=(10, 5))
 axs[0].plot(train_loss_list)
