@@ -8,8 +8,8 @@ class States(Dataset):
     def __init__(self, num_steps=500):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        states_data = torch.load('code/states.pt') # Load your data here
-        self.data = states_data['data'] # Load your actual 2D data here
+        states_data = torch.load('code/states.pt', weights_only=True) # Load your data here
+        self.data = states_data['data'] # Load your actual 2D data here (5000x2)
         self.labels = states_data['labels'] # Load your labels here
 
         n_points = self.data.shape[0]
@@ -24,7 +24,7 @@ class States(Dataset):
         self.mix_data()
     
     def refresh_eps(self):
-        self.eps = None # Get a fresh set of epsilons
+        self.eps = torch.randn(len(self), self.data.shape[1]) # Get a fresh set of epsilons
 
     def mix_data(self):
         self.all_data = []
@@ -90,4 +90,7 @@ class States(Dataset):
         return nll.mean()
 
     def calculate_noisy_data(self, x, t, e):
-        return torch.sqrt(self.alpha_bar[t]) * x + torch.sqrt(1 - self.alpha_bar[t]) * e
+        # Convert t to an integer index
+        step_idx = torch.argmin(torch.abs(self.steps - t)).item()
+        alpha_bar_t = self.alpha_bar[step_idx]
+        return torch.sqrt(alpha_bar_t) * x + torch.sqrt(1 - alpha_bar_t) * e
