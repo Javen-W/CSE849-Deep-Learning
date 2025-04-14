@@ -7,20 +7,20 @@ plt.switch_backend("agg") # this is to avoid a Matplotlib issue.
 class States(Dataset):
     def __init__(self, num_steps=500):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        # Load states.pt using torch.load. It contains the raw data
-        # under the key "data" and the US state labels under the key
-        # "labels". Load the raw data to self.data and the labels to
-        # self.labels.
-        states_data = None # Load your data here
-        self.data = None # Load your actual 2D data here
-        self.labels = None # Load your labels here
+
+        states_data = torch.load('code/states.pt') # Load your data here
+        self.data = states_data['data'] # Load your actual 2D data here
+        self.labels = states_data['labels'] # Load your labels here
+
         n_points = self.data.shape[0]
         self.n_points = n_points
         self.num_steps = num_steps
-        self.steps = None # Create the steps using linspace between -1 and 1
-        self.beta = None # Create beta according to the schedule in PDF
-        self.alpha = None # Compute alpha from beta
-        self.alpha_bar = None # Compute alpha_bar from alpha
+
+        self.steps = torch.linspace(start=-1.0, end=1.0, steps=self.num_steps) # Create the steps using linspace between -1 and 1
+        self.beta = torch.linspace(start=10e-4, end=0.02, steps=self.num_steps) # Create beta according to the schedule in PDF
+        self.alpha = 1.0 - self.beta # Compute alpha from beta
+        self.alpha_bar = torch.stack([torch.prod(self.alpha[:t]) for t in range(len(self.alpha))]) # Compute alpha_bar from alpha
+
         self.mix_data()
     
     def refresh_eps(self):
@@ -69,13 +69,11 @@ class States(Dataset):
             y = 0
         else:
             y = self.labels[data_idx]
-
         return x_, t, eps, x, y
 
     def show(self, samples=None, save_to=None):
         if samples is None:
             samples = self.data
-
         if isinstance(samples, torch.Tensor):
             samples = samples.numpy()
         plt.scatter(samples[:, 0], samples[:, 1], s=1)
