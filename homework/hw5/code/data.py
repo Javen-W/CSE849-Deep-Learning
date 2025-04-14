@@ -40,7 +40,7 @@ class States(Dataset):
             x = self.data[data_idx]
             t = self.steps[step]
             e = self.eps[i]
-            x_ = None # Create the noisy data from x, t, and e
+            x_ = self.calculate_noisy_data(x, t, e) # Create the noisy data from x, t, and e
             if self.labels is None:
                 y = 0
             else:
@@ -64,7 +64,7 @@ class States(Dataset):
         x = self.data[data_idx]
         t = self.steps[step]
         eps = torch.randn_like(x)
-        x_ = None # create the noisy data from x, t, and eps
+        x_ = self.calculate_noisy_data(x, t, eps) # create the noisy data from x, t, and eps
         if self.labels is None:
             y = 0
         else:
@@ -85,8 +85,9 @@ class States(Dataset):
 
     def calc_nll(self, generated):
         data_ = self.data.numpy()
-
         kde = gaussian_kde(data_.T)
         nll = -kde.logpdf(generated.T)
-
         return nll.mean()
+
+    def calculate_noisy_data(self, x, t, e):
+        return torch.sqrt(self.alpha_bar[t]) * x + torch.sqrt(1 - self.alpha_bar[t]) * e
