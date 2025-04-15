@@ -19,7 +19,7 @@ class States(Dataset):
         self.steps = torch.linspace(start=-1.0, end=1.0, steps=self.num_steps) # Create the steps using linspace between -1 and 1
         self.beta = torch.linspace(start=10e-4, end=0.02, steps=self.num_steps) # Create beta according to the schedule in PDF
         self.alpha = 1.0 - self.beta # Compute alpha from beta
-        self.alpha_bar = torch.stack([torch.prod(self.alpha[:t]) for t in range(len(self.alpha))]) # Compute alpha_bar from alpha
+        self.alpha_bar = torch.cumprod(self.alpha, dim=0) # Compute alpha_bar from alpha
 
         self.mix_data()
     
