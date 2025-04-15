@@ -9,67 +9,55 @@ class States(Dataset):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         states_data = torch.load('code/states.pt', weights_only=True) # Load your data here
-        self.data = states_data['data'] # Load your actual 2D data here (5000x2)
+        self.data = states_data['data'].to(self.device) # Load your actual 2D data here (5000x2)
         self.labels = states_data['labels'] # Load your labels here
 
-        n_points = self.data.shape[0]
-        self.n_points = n_points
-        self.num_steps = num_steps
+        self.n_points = self.data.shape[0]
+        self.n_steps = num_steps
 
-        self.steps = torch.linspace(start=-1.0, end=1.0, steps=self.num_steps) # Create the steps using linspace between -1 and 1
-        self.beta = torch.linspace(start=10e-4, end=0.02, steps=self.num_steps) # Create beta according to the schedule in PDF
+        self.steps = torch.linspace(start=-1.0, end=1.0, steps=self.n_steps, device=self.device) # Create the steps using linspace between -1 and 1
+        self.beta = torch.linspace(start=10e-4, end=0.02, steps=self.n_steps, device=self.device) # Create beta according to the schedule in PDF
         self.alpha = 1.0 - self.beta # Compute alpha from beta
         self.alpha_bar = torch.cumprod(self.alpha, dim=0) # Compute alpha_bar from alpha
 
         self.mix_data()
     
     def refresh_eps(self):
-        self.eps = torch.randn(len(self), self.data.shape[1]) # Get a fresh set of epsilons
+        self.eps = torch.randn(len(self), self.data.shape[1], device=self.device) # Get a fresh set of epsilons
+        print(self.eps.shape)
 
     def mix_data(self):
-        self.all_data = []
-        self.all_labels = []
-        self.all_times = []
-        self.refresh_eps()
-        self.eps = self.eps.to("cpu")
-        total_samples = len(self)
+        # Preallocate tensor for efficiency
+        data_len = len(self)
+        self.all_data = torch.empty(data_len, self.data.shape[1], device=self.device)
+        self.all_labels = torch.empty(data_len, dtype=torch.long, device=self.device)
+        self.all_steps = torch.empty(data_len, device=self.device)
 
-        for i in range(total_samples):
+        self.refresh_eps()  # Generate noise
+
+        for i in range(data_len):
             data_idx = i % self.n_points
             step = i // self.n_points
             x = self.data[data_idx]
             t = self.steps[step]
             e = self.eps[i]
-            x_ = self.calculate_noisy_data(x, t, e) # Create the noisy data from x, t, and e
-            if self.labels is None:
-                y = 0
-            else:
-                y = self.labels[data_idx]
+            x_ = self.calculate_noisy_data(x, step, e)  # Use step directly
+            y = 0 if self.labels is None else self.labels[data_idx]
 
-            self.all_data.append(x_)
-            self.all_times.append(t)
-            self.all_labels.append(y)
-
-        self.all_data = torch.stack(self.all_data).to(self.device)
-        self.all_labels = torch.tensor(self.all_labels).to(self.device)
-        self.all_steps = torch.tensor(self.all_times).to(self.device)
-        self.eps = self.eps.to(self.device)
+            self.all_data[i] = x_
+            self.all_steps[i] = t
+            self.all_labels[i] = y
 
     def __len__(self):
-        return self.n_points * self.num_steps
+        return self.n_points * self.n_steps  # 2,500,000
 
     def __getitem__(self, idx):
-        data_idx = idx % self.n_points
-        step = idx // self.n_points
-        x = self.data[data_idx]
-        t = self.steps[step]
-        eps = torch.randn_like(x)
-        x_ = self.calculate_noisy_data(x, t, eps) # create the noisy data from x, t, and eps
-        if self.labels is None:
-            y = 0
-        else:
-            y = self.labels[data_idx]
-        return x_, t, eps, x, y
+        # Return precomputed noisy data
+        return (self.all_data[idx],
+                self.all_steps[idx],
+                torch.randn_like(self.all_data[idx]),  # Fresh eps for training
+                self.data[idx % self.n_points],
+                self.all_labels[idx])
 
     def show(self, samples=None, save_to=None):
         if samples is None:
@@ -89,8 +77,6 @@ class States(Dataset):
         nll = -kde.logpdf(generated.T)
         return nll.mean()
 
-    def calculate_noisy_data(self, x, t, e):
-        # Convert t to an integer index
-        step_idx = torch.argmin(torch.abs(self.steps - t)).item()
+    def calculate_noisy_data(self, x, step_idx, e):
         alpha_bar_t = self.alpha_bar[step_idx]
         return torch.sqrt(alpha_bar_t) * x + torch.sqrt(1 - alpha_bar_t) * e
