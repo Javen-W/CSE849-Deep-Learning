@@ -1,3 +1,4 @@
+import time
 from scipy.stats import gaussian_kde
 import matplotlib.pyplot as plt
 import torch
@@ -23,14 +24,16 @@ class States(Dataset):
         self.mix_data()
 
     def mix_data(self):
-        # Preallocate tensor for efficiency
-        data_len = len(self)
-        self.all_data = torch.empty(data_len, self.data.shape[1], device=self.device)
-        self.all_labels = torch.empty(data_len, dtype=torch.long, device=self.device)
-        self.all_steps = torch.empty(data_len, device=self.device)
-        self.eps = torch.randn(data_len, self.data.shape[1], device=self.device)  # Get a fresh set of noise
+        start_time = time.time()
 
-        for i in range(data_len):
+        # Preallocate tensor for efficiency
+        total_samples = len(self)
+        self.all_data = torch.empty(total_samples, self.data.shape[1], device=self.device)
+        self.all_labels = torch.empty(total_samples, dtype=torch.long, device=self.device)
+        self.all_steps = torch.empty(total_samples, device=self.device)
+        self.eps = torch.randn(total_samples, self.data.shape[1], device=self.device)  # Get a fresh set of noise
+
+        for i in range(total_samples):
             data_idx = i % self.n_points
             step = i // self.n_points
             x = self.data[data_idx]
@@ -42,6 +45,8 @@ class States(Dataset):
             self.all_data[i] = x_
             self.all_steps[i] = t
             self.all_labels[i] = y
+
+        print(f"mix_data(): {time.time() - start_time:.2f} seconds")
 
     def __len__(self):
         return self.n_points * self.n_steps  # 2,500,000
