@@ -19,9 +19,12 @@ torch.manual_seed(777)
 # Training parameters
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 batch_size = 10_000
-num_epochs = 5_000
+n_epochs = 5_000
 lr = 0.001
 weight_decay = 1e-4
+n_steps = 500
+n_workers = 0
+refresh_interval = 1000  # Refresh noise every 1000 epochs
 
 # Create the denoiser model
 mlp = MLP(input_dim=3, output_dim=2, hidden_layers=[256, 256, 256, 256]).to(device)
@@ -36,24 +39,34 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     patience=3,
 )
 
-num_steps = 500
-dataset = States(num_steps=num_steps)
+# Create the dataset and dataloader
+print("Creating dataset...")
+dataset = States(num_steps=n_steps)
+print("Dataset created")
 dataset.show(save_to=os.path.join(plot_dir, "original_data.png"))
+train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=n_workers)
 
 train_loss_list = []
 nll_list = []
 
-def train_one_epoch():
-    avg_loss = 0
-    batch_idx = 0
-    pbar = tqdm(total=len(dataset), leave=False)
-    while training:
-        # Train, compute loss, and update model
-        avg_loss += loss.item()
-        batch_idx += batch_size
-        pbar.update(batch_size)
+def train_one_epoch(epoch):
+    mlp.train()
+    total_loss = 0
+    for batch in tqdm(train_loader, leave=False, desc=f"Train epoch {epoch + 1}/{n_epochs}"):
+        x_, t, eps, x, y = batch
+        t = t.reshape(-1, 1)  # Reshape for MLP input
 
-    avg_loss /= len(dataset) // batch_size
+        optimizer.zero_grad() # Zero the gradient
+        input_ = torch.cat([x_, t], dim=1) # Concatenate x_t and t
+        eps_logits = mlp(input_) # Forward-feed
+        loss = mse_loss(eps_logits, eps)  # Calculate loss
+
+        loss.backward()
+        optimizer.step()
+
+        total_loss += loss.item() * x_.size(0)
+
+    avg_loss = total_loss / len(dataset)
     return avg_loss
 
 @torch.no_grad()
@@ -70,18 +83,18 @@ def sample(num_samples=2000):
     
     z = z.cpu().numpy()
     nll = dataset.calc_nll(z)
-
     return nll, z
 
-for e in trange(num_epochs):
-    train_loss_list.append(train_one_epoch())
+for e in trange(n_epochs):
+    train_loss = train_one_epoch(e)
+    train_loss_list.append(train_loss)
     nll, z = sample()
     nll_list.append(nll)
     # dataset.show(z, os.path.join(plot_dir, f"epoch_{e+1}.png"))
     dataset.show(z, os.path.join(plot_dir, f"latest.png"))
     nll_list.append(0)
-    print(f"Epoch {e+1}/{num_epochs}, Loss: {train_loss_list[-1]:.4f}")
-    scheduler.step()
+    print(f"Epoch {e+1}/{n_epochs}, Loss: {train_loss:.4f}")
+    scheduler.step(train_loss)
     if (e + 1) % 1000 == 0:
         dataset.mix_data()
 

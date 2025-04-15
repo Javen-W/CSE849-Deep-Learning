@@ -21,10 +21,6 @@ class States(Dataset):
         self.alpha_bar = torch.cumprod(self.alpha, dim=0) # Compute alpha_bar from alpha
 
         self.mix_data()
-    
-    def refresh_eps(self):
-        self.eps = torch.randn(len(self), self.data.shape[1], device=self.device) # Get a fresh set of epsilons
-        print(self.eps.shape)
 
     def mix_data(self):
         # Preallocate tensor for efficiency
@@ -32,8 +28,7 @@ class States(Dataset):
         self.all_data = torch.empty(data_len, self.data.shape[1], device=self.device)
         self.all_labels = torch.empty(data_len, dtype=torch.long, device=self.device)
         self.all_steps = torch.empty(data_len, device=self.device)
-
-        self.refresh_eps()  # Generate noise
+        self.eps = torch.randn(data_len, self.data.shape[1], device=self.device)  # Get a fresh set of noise
 
         for i in range(data_len):
             data_idx = i % self.n_points
@@ -55,7 +50,8 @@ class States(Dataset):
         # Return precomputed noisy data
         return (self.all_data[idx],
                 self.all_steps[idx],
-                torch.randn_like(self.all_data[idx]),  # Fresh eps for training
+                self.eps[idx],
+                # torch.randn_like(self.all_data[idx]),  # Fresh eps for training
                 self.data[idx % self.n_points],
                 self.all_labels[idx])
 
@@ -63,7 +59,7 @@ class States(Dataset):
         if samples is None:
             samples = self.data
         if isinstance(samples, torch.Tensor):
-            samples = samples.numpy()
+            samples = samples.cpu().numpy()
         plt.scatter(samples[:, 0], samples[:, 1], s=1)
         plt.axis('equal')
         if save_to is not None:
