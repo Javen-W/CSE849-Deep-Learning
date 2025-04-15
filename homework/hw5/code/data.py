@@ -73,7 +73,7 @@ class States(Dataset):
         plt.clf()
 
     def calc_nll(self, generated):
-        data_ = self.data.numpy()
+        data_ = self.data.cpu().numpy()
         kde = gaussian_kde(data_.T)
         nll = -kde.logpdf(generated.T)
         return nll.mean()
