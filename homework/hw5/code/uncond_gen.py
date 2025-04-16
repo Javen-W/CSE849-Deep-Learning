@@ -39,12 +39,21 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     patience=3,
 )
 
+def custom_collate(batch):
+    # batch is a list of tuples (x_, t, eps, x, y) from States.__getitem__
+    x_ = torch.stack([item[0] for item in batch]).to(device)  # [batch_size, 2]
+    t = torch.stack([item[1] for item in batch]).to(device)  # [batch_size, 1]
+    eps = torch.stack([item[2] for item in batch]).to(device)  # [batch_size, 2]
+    x = torch.stack([item[3] for item in batch]).to(device)  # [batch_size, 2]
+    y = torch.tensor([item[4] for item in batch], dtype=torch.long, device=device)  # [batch_size]
+    return x_, t, eps, x, y
+
 # Create the dataset and dataloader
 print("Creating dataset...")
 dataset = States(num_steps=n_steps)
 print("Dataset created")
 dataset.show(save_to=os.path.join(plot_dir, "original_data.png"))
-train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=n_workers)
+train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=n_workers, collate_fn=custom_collate)
 
 train_loss_list = []
 nll_list = []
