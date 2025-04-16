@@ -35,6 +35,27 @@ class States(Dataset):
         # Pre-compute dataset
         self.mix_data()
 
+    def __len__(self):
+        return self.n_points * self.n_steps  # 2,500,000
+
+    def __getitem__(self, idx):
+        # Return precomputed noisy data
+        return (self.all_data[idx],
+                self.all_steps[idx],
+                self.eps[idx],
+                self.data[idx % self.n_points],
+                self.all_labels[idx])
+
+    def generate_sample(self, idx):
+        data_idx = idx % self.n_points
+        step_idx = idx // self.n_points
+        x = self.data[data_idx]
+        t = self.steps[step_idx]
+        e = torch.randn_like(x) if self.eps is None else self.eps[idx]
+        x_ = self.calculate_noisy_data(x, step_idx, e)
+        y = 0 if self.labels is None else self.labels[data_idx]
+        return x_, t, e, x, y
+
     def mix_data(self):
         print("Initializing dataset...")
         start_time = time.time()
@@ -53,14 +74,8 @@ class States(Dataset):
                       f"memory: {psutil.Process().memory_info().rss / 1024 ** 2:.2f} MB, "
                       f"GPU memory: {torch.cuda.memory_allocated(self.device) / 1024 ** 2:.2f} MB")
 
-            data_idx = i % self.n_points
-            step_idx = i // self.n_points
-            x = self.data[data_idx]
-            t = self.steps[step_idx]
-            e = self.eps[i]
-            x_ = self.calculate_noisy_data(x, step_idx, e)
-            y = 0 if self.labels is None else self.labels[data_idx]
-
+            # Generate & cache sample
+            x_, t, e, x, y = self.generate_sample(i)
             self.all_data[i] = x_
             self.all_steps[i] = t
             self.all_labels[i] = y
@@ -72,17 +87,6 @@ class States(Dataset):
         torch.cuda.empty_cache()
         print(f"Dataset initialized, took {time.time() - start_time:.2f}s")
         print(f"Memory after mix_data: {psutil.Process().memory_info().rss / 1024 ** 2:.2f} MB")
-
-    def __len__(self):
-        return self.n_points * self.n_steps  # 2,500,000
-
-    def __getitem__(self, idx):
-        # Return precomputed noisy data
-        return (self.all_data[idx],
-                self.all_steps[idx],
-                self.eps[idx],
-                self.data[idx % self.n_points],
-                self.all_labels[idx])
 
     def show(self, samples=None, save_to=None):
         if samples is None:
