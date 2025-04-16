@@ -81,15 +81,21 @@ def train_one_epoch(epoch):
 @torch.no_grad()
 def sample(num_samples=2000):
     mlp.eval()
-    z = None # start with noise
+    z = torch.randn(num_samples, 2).to(device)  # Start with noise
 
-    for i in np.arange(num_steps-1, -1, -1):
-        eps = None # compute the noise
-        
-        t = None # get the time step
+    for i in range(n_steps - 1, -1, -1):
+        t = dataset.steps[i].expand(num_samples, 1)
         z_ = torch.cat([z, t], dim=1)
-        z = None # compute z for the next time using your denoiser, eps and z_
-    
+        eps = mlp(z_)
+        alpha_bar_t = dataset.alpha_bar[i]
+        alpha_t = dataset.alpha[i]
+        beta_t = dataset.beta[i]
+
+        # DDPM sampling step
+        z = (z - (1 - alpha_t) / torch.sqrt(1 - alpha_bar_t) * eps) / torch.sqrt(alpha_t)
+        if i > 0:  # Add noise except at t=0
+            z += torch.sqrt(beta_t) * torch.randn_like(z)
+
     z = z.cpu().numpy()
     nll = dataset.calc_nll(z)
     return nll, z
@@ -104,7 +110,7 @@ for e in trange(n_epochs):
     nll_list.append(0)
     print(f"Epoch {e+1}/{n_epochs}, Loss: {train_loss:.4f}")
     scheduler.step(train_loss)
-    if (e + 1) % 1000 == 0:
+    if (e + 1) % refresh_interval == 0:
         dataset.mix_data()
 
 # if you don't have enough GPU space to generate 5000 samples at once,
