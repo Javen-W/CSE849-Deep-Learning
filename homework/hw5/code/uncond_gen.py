@@ -10,6 +10,9 @@ plt.switch_backend("agg")
 from models import MLP
 from data import States
 
+import faulthandler
+faulthandler.enable()
+
 plot_dir = "outputs/plots/unconditional_generation"
 os.makedirs(plot_dir, exist_ok=True)
 
@@ -61,19 +64,28 @@ nll_list = []
 def train_one_epoch(epoch):
     mlp.train()
     total_loss = 0
-    for batch in tqdm(train_loader, leave=False, desc=f"Train epoch {epoch + 1}/{n_epochs}"):
-        x_, t, eps, x, y = batch
-        t = t.reshape(-1, 1)  # Reshape for MLP input
+    try:
+        for batch in tqdm(train_loader, leave=False, desc=f"Train epoch {epoch + 1}/{n_epochs}"):
+            x_, t, eps, x, y = batch
+            x_ = x_.to(device)
+            t = t.to(device)
+            eps = eps.to(device)
 
-        optimizer.zero_grad() # Zero the gradient
-        input_ = torch.cat([x_, t], dim=1) # Concatenate x_t and t
-        eps_logits = mlp(input_) # Forward-feed
-        loss = mse_loss(eps_logits, eps)  # Calculate loss
+            optimizer.zero_grad() # Zero the gradient
+            input_ = torch.cat([x_, t], dim=1) # Concatenate x_t and t
+            eps_logits = mlp(input_) # Forward-feed
+            loss = mse_loss(eps_logits, eps)  # Calculate loss
 
-        loss.backward()
-        optimizer.step()
+            torch.nn.utils.clip_grad_norm_(mlp.parameters(), max_norm=1.0)  # Clip gradients
+            loss.backward()
+            optimizer.step()
 
-        total_loss += loss.item() * x_.size(0)
+            total_loss += loss.item() * x_.size(0)
+            torch.cuda.empty_cache()  # Free unused memory
+            # torch.cuda.synchronize()  # Ensure CUDA ops complete
+    except RuntimeError as e:
+        print(f"Error in epoch {epoch + 1}: {e}")
+        raise
 
     avg_loss = total_loss / len(dataset)
     return avg_loss
