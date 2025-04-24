@@ -21,10 +21,11 @@ torch.manual_seed(777)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 n_steps = 500
 batch_size = 10_000
-n_epochs = 5_000
+n_epochs = 50
 lr = 0.001
 weight_decay = 1e-4
 n_workers = 0
+refresh_interval = 1000  # Refresh noise
 
 # TODO: Create the dataset and the dataloader. Remember to use the same
 # number of steps in the dataset as the generation code.
