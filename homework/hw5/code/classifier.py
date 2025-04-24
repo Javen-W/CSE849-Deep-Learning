@@ -19,22 +19,30 @@ torch.manual_seed(777)
 
 # Training parameters
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-lr = None
-num_epochs = None
 n_steps = 500
+batch_size = 10_000
+n_epochs = 5_000
+lr = 0.001
+weight_decay = 1e-4
+n_workers = 0
 
 # TODO: Create the dataset and the dataloader. Remember to use the same
 # number of steps in the dataset as the generation code.
 dataset = States(num_steps=n_steps)
+train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=n_workers, collate_fn=None)
 
-# TODO: create the architecture with the hidden size layers from the
-# PDF.
-classifier = None
+# TODO: create the architecture with the hidden size layers from the PDF.
+classifier = MLP(input_dim=3, output_dim=5, hidden_layers=[100, 200, 500]).to(device)
 
 # TODO: Create loss function, optimizer, and scheduler. 
-ce_loss = None
-optimizer = None
-scheduler = None
+ce_loss = nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(classifier.parameters(), lr=lr, weight_decay=weight_decay)
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+    optimizer,
+    mode='min',
+    factor=0.5,
+    patience=3,
+)
 
 label_to_states = {0: "Michigan",
                    1: "Idaho",
