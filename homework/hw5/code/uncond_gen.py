@@ -62,7 +62,6 @@ train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_work
 
 train_loss_list = []
 nll_list = []
-
 def train_one_epoch(epoch):
     denoiser.train()
     total_loss = 0

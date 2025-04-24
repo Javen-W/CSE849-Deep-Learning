@@ -52,7 +52,34 @@ label_to_states = {0: "Michigan",
 colors = ["red", "blue", "green", "orange", "purple"]
 cmap = ListedColormap(colors)
 
+def train_one_epoch(epoch):
+    classifier.train()
+    total_loss = 0
+    for batch in tqdm(train_loader, leave=False, desc=f"Train epoch {epoch + 1}/{n_epochs}"):
+        x_, t, eps, x, y = batch
+
+        optimizer.zero_grad()  # Zero the gradient
+        input_ = torch.cat([x_, t], dim=1)  # Concatenate x_t and t
+        logits = classifier(input_)  # Forward-feed
+        loss = ce_loss(logits, y)  # Calculate loss
+
+        torch.nn.utils.clip_grad_norm_(classifier.parameters(), max_norm=1.0)  # Clip gradients
+        loss.backward()
+        optimizer.step()
+        total_loss += loss.item() * x_.size(0)
+
+    avg_loss = total_loss / len(dataset)
+    return avg_loss
+
 #TODO: Train the classifier and save it.
+train_loss_list = []
+for e in trange(n_epochs):
+    train_loss = train_one_epoch(e)
+    train_loss_list.append(train_loss)
+    print(f"Epoch {e+1}/{n_epochs}, Loss: {train_loss:.4f}")
+    scheduler.step(train_loss)
+    if (e + 1) % refresh_interval == 0:
+        dataset.mix_data()
 torch.save(classifier.state_dict(), os.path.join(checkpoints_dir, "classifier.pt"))
 
 clean_X = dataset.data
