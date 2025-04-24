@@ -142,6 +142,5 @@ axs[1].set_ylabel("NLL")
 axs[1].set_yscale("log")
 
 fig.tight_layout()
-fig.savefig(os.path.join(plot_dir, "train_logs.png"),
-            dpi=300, bbox_inches="tight")
+fig.savefig(os.path.join(plot_dir, "train_logs.png"), dpi=300, bbox_inches="tight")
 plt.close(fig)

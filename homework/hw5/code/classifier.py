@@ -83,6 +83,18 @@ for e in trange(n_epochs):
         dataset.mix_data()
 torch.save(classifier.state_dict(), os.path.join(checkpoints_dir, "classifier.pt"))
 
+# Training history plot
+fig, axs = plt.subplots(1, 1, figsize=(5, 5))
+axs.plot(train_loss_list)
+axs.set_title("Training Loss")
+axs.set_xlabel("Epoch")
+axs.set_ylabel("Loss")
+axs.set_yscale("log")
+fig.tight_layout()
+fig.savefig(os.path.join(plot_dir, "train_logs.png"), dpi=300, bbox_inches="tight")
+plt.close(fig)
+
+# Classifier predictions plot
 clean_X = dataset.data
 labels = dataset.labels
 classifier.eval()
@@ -98,8 +110,7 @@ ax = fig.add_subplot(111)
 ax.set_title("Classifier Predictions")
 ax.set_xlabel("X")
 ax.set_ylabel("Y")
-im = ax.scatter(clean_X[:, 0], clean_X[:, 1], s=1,
-           c=all_preds, cmap=cmap)
+im = ax.scatter(clean_X[:, 0], clean_X[:, 1], s=1, c=all_preds, cmap=cmap)
 
 X_max1 = clean_X.max(0).values[0].item()
 X_max2 = clean_X.max(0).values[1].item()
@@ -123,8 +134,7 @@ with torch.no_grad():
 X = X.reshape(100, 100)
 Y = Y.reshape(100, 100)
 
-ax.contourf(X, Y, grid_preds, alpha=0.3,
-            cmap=cmap, levels=5)
+ax.contourf(X, Y, grid_preds, alpha=0.3, cmap=cmap, levels=5)
 cbar = fig.colorbar(im, label="States")
 cbar.set_ticks(np.arange(5)*0.8 + 0.4, labels=list(label_to_states.values()))
 plt.savefig(os.path.join(plot_dir, "classifier_predictions.png"))
