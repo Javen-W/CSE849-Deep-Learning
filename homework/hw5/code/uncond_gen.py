@@ -32,11 +32,11 @@ n_workers = 0
 refresh_interval = 1000  # Refresh noise every 1000 epochs
 
 # Create the denoiser model
-mlp = MLP(input_dim=3, output_dim=2, hidden_layers=[256, 256, 256, 256]).to(device)
+denoiser = MLP(input_dim=3, output_dim=2, hidden_layers=[256, 256, 256, 256]).to(device)
 mse_loss = nn.MSELoss() # create the denoising (MSE) loss function
 
 # Create your optimizer and learning rate scheduler
-optimizer = torch.optim.Adam(mlp.parameters(), lr=lr, weight_decay=weight_decay)
+optimizer = torch.optim.Adam(denoiser.parameters(), lr=lr, weight_decay=weight_decay)
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     optimizer,
     mode='min',
@@ -64,43 +64,38 @@ train_loss_list = []
 nll_list = []
 
 def train_one_epoch(epoch):
-    mlp.train()
+    denoiser.train()
     total_loss = 0
     try:
         for batch in tqdm(train_loader, leave=False, desc=f"Train epoch {epoch + 1}/{n_epochs}"):
             x_, t, eps, x, y = batch
-            x_ = x_.to(device)
-            t = t.to(device)
-            eps = eps.to(device)
 
             optimizer.zero_grad() # Zero the gradient
             input_ = torch.cat([x_, t], dim=1) # Concatenate x_t and t
-            eps_logits = mlp(input_) # Forward-feed
+            eps_logits = denoiser(input_) # Forward-feed
             loss = mse_loss(eps_logits, eps)  # Calculate loss
-
-            torch.nn.utils.clip_grad_norm_(mlp.parameters(), max_norm=1.0)  # Clip gradients
+            
+            torch.nn.utils.clip_grad_norm_(denoiser.parameters(), max_norm=1.0)  # Clip gradients
             loss.backward()
             optimizer.step()
 
             total_loss += loss.item() * x_.size(0)
             torch.cuda.empty_cache()  # Free unused memory
-            # torch.cuda.synchronize()  # Ensure CUDA ops complete
     except RuntimeError as e:
         print(f"Error in epoch {epoch + 1}: {e}")
         raise
-
     avg_loss = total_loss / len(dataset)
     return avg_loss
 
 @torch.no_grad()
 def sample(num_samples=2000):
-    mlp.eval()
+    denoiser.eval()
     z = torch.randn(num_samples, 2).to(device)  # Start with noise
 
     for i in range(n_steps - 1, -1, -1):
         t = dataset.steps[i].expand(num_samples, 1)
         z_ = torch.cat([z, t], dim=1)
-        eps = mlp(z_)
+        eps = denoiser(z_)
         alpha_bar_t = dataset.alpha_bar[i]
         alpha_t = dataset.alpha[i]
         beta_t = dataset.beta[i]
@@ -109,6 +104,7 @@ def sample(num_samples=2000):
         z = (z - (1 - alpha_t) / torch.sqrt(1 - alpha_bar_t) * eps) / torch.sqrt(alpha_t)
         if i > 0:  # Add noise except at t=0
             z += torch.sqrt(beta_t) * torch.randn_like(z)
+            # z += torch.randn_like(z)
 
     z = z.cpu().numpy()
     nll = dataset.calc_nll(z)
@@ -132,7 +128,7 @@ for e in trange(n_epochs):
 nll, z = sample(5000)
 dataset.show(z, os.path.join(plot_dir, "final.png"))
 np.save(os.path.join(plot_dir, "uncond_gen_samples.pt"), z)
-torch.save(mlp.state_dict(), os.path.join(checkpoints_dir, "denoiser.pt"))
+torch.save(denoiser.state_dict(), os.path.join(checkpoints_dir, "denoiser.pt"))
 
 fig, axs = plt.subplots(1, 2, figsize=(10, 5))
 axs[0].plot(train_loss_list)
