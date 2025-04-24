@@ -15,6 +15,8 @@ faulthandler.enable()
 
 plot_dir = "outputs/plots/unconditional_generation"
 os.makedirs(plot_dir, exist_ok=True)
+checkpoints_dir = "checkpoints"
+os.makedirs(checkpoints_dir, exist_ok=True)
 
 # Seed
 torch.manual_seed(777)
@@ -130,7 +132,7 @@ for e in trange(n_epochs):
 nll, z = sample(5000)
 dataset.show(z, os.path.join(plot_dir, "final.png"))
 np.save(os.path.join(plot_dir, "uncond_gen_samples.pt"), z)
-torch.save(mlp.state_dict(), "checkpoints/denoiser.pt")
+torch.save(mlp.state_dict(), os.path.join(checkpoints_dir, "denoiser.pt"))
 
 fig, axs = plt.subplots(1, 2, figsize=(10, 5))
 axs[0].plot(train_loss_list)
