@@ -1,3 +1,4 @@
+import os
 import torch
 from torch import nn
 from models import MLP
@@ -8,16 +9,27 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 
+plot_dir = "outputs/plots/classification"
+os.makedirs(plot_dir, exist_ok=True)
+checkpoints_dir = "checkpoints"
+os.makedirs(checkpoints_dir, exist_ok=True)
+
+# Seed
+torch.manual_seed(777)
+
+# Training parameters
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+lr = None
+num_epochs = None
+n_steps = 500
+
 # TODO: Create the dataset and the dataloader. Remember to use the same
 # number of steps in the dataset as the generation code.
+dataset = States(num_steps=n_steps)
 
 # TODO: create the architecture with the hidden size layers from the
 # PDF.
 classifier = None
-
-# TODO: Set the training parameters.
-lr = None
-num_epochs = None
 
 # TODO: Create loss function, optimizer, and scheduler. 
 ce_loss = None
@@ -33,7 +45,7 @@ colors = ["red", "blue", "green", "orange", "purple"]
 cmap = ListedColormap(colors)
 
 #TODO: Train the classifier and save it.
-torch.save(classifier.state_dict(), "classifier.pt")
+torch.save(classifier.state_dict(), os.path.join(checkpoints_dir, "classifier.pt"))
 
 clean_X = dataset.data
 labels = dataset.labels
@@ -79,5 +91,5 @@ ax.contourf(X, Y, grid_preds, alpha=0.3,
             cmap=cmap, levels=5)
 cbar = fig.colorbar(im, label="States")
 cbar.set_ticks(np.arange(5)*0.8 + 0.4, labels=list(label_to_states.values()))
-plt.savefig("classifier_predictions.png")
+plt.savefig(os.path.join(plot_dir, "classifier_predictions.png"))
 

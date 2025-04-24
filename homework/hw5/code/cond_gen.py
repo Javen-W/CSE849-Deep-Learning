@@ -8,32 +8,36 @@ plt.switch_backend("agg")
 from models import MLP
 from data import States
 
-plot_dir = "plots/conditional_diffusion"
+plot_dir = "outputs/plots/conditional_diffusion"
 os.makedirs(plot_dir, exist_ok=True)
+checkpoints_dir = "checkpoints"
+os.makedirs(checkpoints_dir, exist_ok=True)
+
+# Seed
+torch.manual_seed(777)
 
 # training parameters
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 batch_size = None
 num_epochs = None
-num_steps = None
+n_steps = 500
 
 # create the same classifier as in classifier.py and load the weights.
 # Set it to eval mode.
 classifier = None
 logsoftmax = None # create log-softmax
 
-# create your denoiser model architecture and load the weights from
-# uncond_gen.py
+# create your denoiser model architecture and load the weights from uncond_gen.py
 mlp = None
 
-dataset = States(num_steps=num_steps)
+dataset = States(num_steps=n_steps)
 dataset.show(save_to=os.path.join(plot_dir, "original_data.png"))
 
 def sample(label, num_samples=1000):
     mlp.eval()
     z = None # start with random noise
 
-    for i in np.arange(num_steps-1, 0, -1):
+    for i in np.arange(n_steps-1, 0, -1):
         t = None # get the time step
         z_ = torch.cat([z, t], dim=1)
         eps = None # get the denoiser prediction
