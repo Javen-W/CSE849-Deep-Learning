@@ -24,12 +24,12 @@ torch.manual_seed(777)
 # Training parameters
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 batch_size = 10_000
-n_epochs = 5_000
+n_epochs = 5_00
 lr = 0.001
 weight_decay = 1e-4
 n_steps = 500
-n_workers = 0
-refresh_interval = 1000  # Refresh noise
+n_workers = 4
+refresh_interval = 100  # Refresh noise
 
 # Create the denoiser model
 denoiser = MLP(input_dim=3, output_dim=2, hidden_layers=[256, 256, 256, 256]).to(device)
@@ -40,8 +40,8 @@ optimizer = torch.optim.Adam(denoiser.parameters(), lr=lr, weight_decay=weight_d
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     optimizer,
     mode='min',
-    factor=0.5,
-    patience=3,
+    factor=0.1,
+    patience=10,
 )
 
 def custom_collate(batch):
@@ -115,7 +115,6 @@ for e in trange(n_epochs):
     nll_list.append(nll)
     # dataset.show(z, os.path.join(plot_dir, f"epoch_{e+1}.png"))
     dataset.show(z, os.path.join(plot_dir, f"latest.png"))
-    nll_list.append(0)
     print(f"Epoch {e+1}/{n_epochs}, Loss: {train_loss:.4f}")
     scheduler.step(train_loss)
     if (e + 1) % refresh_interval == 0:
