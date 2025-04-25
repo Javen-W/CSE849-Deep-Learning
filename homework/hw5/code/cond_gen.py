@@ -28,13 +28,13 @@ classifier = None
 logsoftmax = None # create log-softmax
 
 # create your denoiser model architecture and load the weights from uncond_gen.py
-mlp = None
+denoiser = None
 
 dataset = States(num_steps=n_steps)
 dataset.show(save_to=os.path.join(plot_dir, "original_data.png"))
 
 def sample(label, num_samples=1000):
-    mlp.eval()
+    denoiser.eval()
     z = None # start with random noise
 
     for i in np.arange(n_steps-1, 0, -1):
@@ -49,7 +49,6 @@ def sample(label, num_samples=1000):
  
     z = z.detach().cpu().numpy()
     nll = dataset.calc_nll(z)
-
     return nll, z
 
 for label in range(5):
