@@ -36,14 +36,17 @@ dataset.show(save_to=os.path.join(plot_dir, "original_data.png"))
 
 def sample(label, num_samples=1000):
     denoiser.eval()
-    z = None # start with random noise
+    z = torch.randn(num_samples, 2).to(device) # start with random noise
 
     for i in np.arange(n_steps - 1, 0, -1):
-        t = None # get the time step
+        t = dataset.steps[i].expand(num_samples, 1).to(device) # get the time step
         z_ = torch.cat([z, t], dim=1)
-        eps = None # get the denoiser prediction
+        eps = denoiser(z_) # get the denoiser prediction
+
         # compute the gradient of the log-softmax classifier w.r.t. the input.
-        cls_grad = None
+        cls_logits = logsoftmax(classifier(z_))[label]
+
+        cls_grad = cls_logits.backward()
         eps_hat = None # compute eps_hat
         z = None # compute z for the next step
  
