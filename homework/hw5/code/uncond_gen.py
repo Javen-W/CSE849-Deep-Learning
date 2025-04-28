@@ -15,6 +15,8 @@ faulthandler.enable()
 
 plot_dir = "outputs/plots/unconditional_generation"
 os.makedirs(plot_dir, exist_ok=True)
+plot_steps_dir = os.path.join(plot_dir, "steps")
+os.makedirs(plot_steps_dir, exist_ok=True)
 checkpoints_dir = "checkpoints"
 os.makedirs(checkpoints_dir, exist_ok=True)
 
@@ -41,15 +43,15 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     optimizer,
     mode='min',
     factor=0.1,
-    patience=10,
+    patience=5,
 )
 
 def custom_collate(batch):
     # batch is a list of tuples (x_, t, eps, x, y) from States.__getitem__
-    x_ = torch.stack([item[0] for item in batch]).to(device)  # [batch_size, 2]
-    t = torch.stack([item[1] for item in batch]).to(device)  # [batch_size, 1]
-    eps = torch.stack([item[2] for item in batch]).to(device)  # [batch_size, 2]
-    x = torch.stack([item[3] for item in batch]).to(device)  # [batch_size, 2]
+    x_ = torch.stack([item[0] for item in batch]).to(device)
+    t = torch.stack([item[1] for item in batch]).to(device)
+    eps = torch.stack([item[2] for item in batch]).to(device)
+    x = torch.stack([item[3] for item in batch]).to(device)
     y = torch.tensor([item[4] for item in batch], dtype=torch.long, device=device)  # [batch_size]
     return x_, t, eps, x, y
 
@@ -79,7 +81,7 @@ def train_one_epoch(epoch):
             optimizer.step()
 
             total_loss += loss.item() * x_.size(0)
-            # torch.cuda.empty_cache()  # Free unused memory
+        torch.cuda.empty_cache()  # Free unused memory
     except RuntimeError as e:
         print(f"Error in epoch {epoch + 1}: {e}")
         raise
@@ -113,8 +115,8 @@ for e in trange(n_epochs):
     train_loss_list.append(train_loss)
     nll, z = sample()
     nll_list.append(nll)
-    # dataset.show(z, os.path.join(plot_dir, f"epoch_{e+1}.png"))
-    dataset.show(z, os.path.join(plot_dir, f"latest.png"))
+    dataset.show(z, os.path.join(plot_steps_dir, f"epoch_{e+1}.png"))
+    # dataset.show(z, os.path.join(plot_dir, f"latest.png"))
     print(f"Epoch {e+1}/{n_epochs}, Loss: {train_loss:.4f}")
     scheduler.step(train_loss)
     if (e + 1) % refresh_interval == 0:
