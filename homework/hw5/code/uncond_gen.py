@@ -30,7 +30,8 @@ n_epochs = 5_000
 lr = 0.001
 weight_decay = 1e-4
 n_steps = 500
-refresh_interval = 1000  # Refresh noise
+refresh_interval = 100  # Refresh noise
+save_interval = 10
 
 # Create the denoiser model
 denoiser = MLP(input_dim=3, output_dim=2, hidden_layers=[256, 256, 256, 256]).to(device)
@@ -42,7 +43,7 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     optimizer,
     mode='min',
     factor=0.1,
-    patience=5,
+    patience=10,
 )
 
 # Create the dataset and dataloader
@@ -101,7 +102,32 @@ def sample(num_samples=2000):
     nll = dataset.calc_nll(z)
     return nll, z
 
+def save_training():
+    # if you don't have enough GPU space to generate 5000 samples at once,
+    # you can do it in batches of 100 or whatever size works for you.
+    nll, z = sample(5000)
+    dataset.show(z, os.path.join(plot_dir, "final.png"))
+    np.save(os.path.join(plot_dir, "uncond_gen_samples.pt"), z)
+    torch.save(denoiser.state_dict(), os.path.join(checkpoints_dir, "denoiser.pt"))
 
+    fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+    axs[0].plot(train_loss_list)
+    axs[0].set_title("Training Loss")
+    axs[0].set_xlabel("Epoch")
+    axs[0].set_ylabel("Loss")
+    axs[0].set_yscale("log")
+
+    axs[1].plot(nll_list)
+    axs[1].set_title("Negative Log Likelihood")
+    axs[1].set_xlabel("Epoch")
+    axs[1].set_ylabel("NLL")
+    axs[1].set_yscale("log")
+
+    fig.tight_layout()
+    fig.savefig(os.path.join(plot_dir, "train_logs.png"), dpi=300, bbox_inches="tight")
+    plt.close(fig)
+
+# Run Training
 for e in trange(n_epochs):
     train_loss = train_one_epoch(e)
     train_loss_list.append(train_loss)
@@ -113,27 +139,8 @@ for e in trange(n_epochs):
     scheduler.step(nll)
     if (e + 1) % refresh_interval == 0:
         dataset.mix_data()
+    if (e + 1) % save_interval == 0:
+        save_training()
+save_training()
 
-# if you don't have enough GPU space to generate 5000 samples at once,
-# you can do it in batches of 100 or whatever size works for you.
-nll, z = sample(5000)
-dataset.show(z, os.path.join(plot_dir, "final.png"))
-np.save(os.path.join(plot_dir, "uncond_gen_samples.pt"), z)
-torch.save(denoiser.state_dict(), os.path.join(checkpoints_dir, "denoiser.pt"))
 
-fig, axs = plt.subplots(1, 2, figsize=(10, 5))
-axs[0].plot(train_loss_list)
-axs[0].set_title("Training Loss")
-axs[0].set_xlabel("Epoch")
-axs[0].set_ylabel("Loss")
-axs[0].set_yscale("log")
-
-axs[1].plot(nll_list)
-axs[1].set_title("Negative Log Likelihood")
-axs[1].set_xlabel("Epoch")
-axs[1].set_ylabel("NLL")
-axs[1].set_yscale("log")
-
-fig.tight_layout()
-fig.savefig(os.path.join(plot_dir, "train_logs.png"), dpi=300, bbox_inches="tight")
-plt.close(fig)
