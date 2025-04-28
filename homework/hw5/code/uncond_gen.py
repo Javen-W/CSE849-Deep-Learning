@@ -26,11 +26,11 @@ torch.manual_seed(777)
 # Training parameters
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 batch_size = 10_000
-n_epochs = 5_000
-lr = 0.001
-weight_decay = 1e-4
+n_epochs = 300
+lr = 1e-3
+weight_decay = 1e-7
 n_steps = 500
-refresh_interval = 100  # Refresh noise
+refresh_interval = 25  # Refresh noise
 save_interval = 10
 
 # Create the denoiser model
@@ -38,13 +38,8 @@ denoiser = MLP(input_dim=3, output_dim=2, hidden_layers=[256, 256, 256, 256]).to
 mse_loss = nn.MSELoss() # create the denoising (MSE) loss function
 
 # Create your optimizer and learning rate scheduler
-optimizer = torch.optim.Adam(denoiser.parameters(), lr=lr, weight_decay=weight_decay)
-scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-    optimizer,
-    mode='min',
-    factor=0.1,
-    patience=10,
-)
+optimizer = torch.optim.AdamW(denoiser.parameters(), lr=lr, weight_decay=weight_decay)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=2, gamma=0.99)
 
 # Create the dataset and dataloader
 print("Creating dataset...")
