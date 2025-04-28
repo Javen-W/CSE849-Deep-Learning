@@ -1,3 +1,4 @@
+import random
 import sys
 import time
 from scipy.stats import gaussian_kde
@@ -25,6 +26,7 @@ class States(Dataset):
 
         self.n_points = self.data.shape[0]  # 5000
         self.n_steps = num_steps  # 500
+        self.idx_map = [i for i in range(self.__len__())]
 
         print("Computing noise schedule...")
         start_time = time.time()
@@ -43,11 +45,16 @@ class States(Dataset):
 
     def __getitem__(self, idx):
         # Return precomputed noisy data
+        idx = self.idx_map[idx]
         return (self.all_data[idx],
                 self.all_steps[idx],
                 self.eps[idx],
                 # self.data[idx % self.n_points],
                 self.all_labels[idx])
+
+    def shuffle(self):
+        # Shuffle sample indices
+        random.shuffle(self.idx_map)
 
     def generate_sample(self, idx):
         data_idx = idx % self.n_points

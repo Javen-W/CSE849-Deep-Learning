@@ -56,6 +56,7 @@ nll_list = []
 def train_one_epoch(epoch):
     denoiser.train()
     total_loss = 0
+    dataset.shuffle()
     try:
         for i in range(0, len(dataset), batch_size):
             x_, t, eps, y = dataset[i:i + batch_size]
