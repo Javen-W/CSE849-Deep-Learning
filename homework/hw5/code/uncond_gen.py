@@ -89,11 +89,11 @@ def sample(num_samples=2000):
         t = dataset.steps[i].expand(num_samples, 1).to(device)
         z_ = torch.cat([z, t], dim=1)
         eps = denoiser(z_)
+
+        # DDPM sampling step
         alpha_bar_t = dataset.alpha_bar[i].to(device)
         alpha_t = dataset.alpha[i].to(device)
         beta_t = dataset.beta[i].to(device)
-
-        # DDPM sampling step
         z = (z - (1 - alpha_t) / torch.sqrt(1 - alpha_bar_t) * eps) / torch.sqrt(alpha_t)
         if i > 0:  # Add noise except at t=0
             z += torch.sqrt(beta_t) * torch.randn_like(z)

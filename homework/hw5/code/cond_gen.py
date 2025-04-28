@@ -45,10 +45,13 @@ def sample(label, num_samples=1000):
 
         # compute the gradient of the log-softmax classifier w.r.t. the input.
         cls_logits = logsoftmax(classifier(z_))[label]
-
         cls_grad = cls_logits.backward()
-        eps_hat = None # compute eps_hat
-        z = None # compute z for the next step
+
+        # Sampling step
+        alpha_bar_t = dataset.alpha_bar[i].to(device)
+        alpha_bar_tm1 = dataset.alpha_bar[i - 1].to(device)
+        eps_hat = eps - torch.sqrt(1 - alpha_bar_t) * cls_grad * cls_logits
+        z = torch.sqrt(alpha_bar_tm1) * ((z - torch.sqrt(1 - alpha_bar_t) * eps_hat) / torch.sqrt(alpha_bar_t)) + torch.sqrt(1 - alpha_bar_tm1) * eps_hat
  
     z = z.detach().cpu().numpy()
     nll = dataset.calc_nll(z)
