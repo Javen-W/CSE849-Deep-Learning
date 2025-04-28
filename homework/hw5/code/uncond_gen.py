@@ -4,7 +4,7 @@ import torch.nn as nn
 import numpy as np
 # from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
-# from tqdm import trange, tqdm
+from tqdm import trange, tqdm
 plt.switch_backend("agg")
 
 from models import MLP
@@ -102,15 +102,15 @@ def sample(num_samples=2000):
     return nll, z
 
 
-for e in range(n_epochs):
+for e in trange(n_epochs):
     train_loss = train_one_epoch(e)
     train_loss_list.append(train_loss)
     nll, z = sample()
     nll_list.append(nll)
     dataset.show(z, os.path.join(plot_steps_dir, f"epoch_{e+1}.png"))
     # dataset.show(z, os.path.join(plot_dir, f"latest.png"))
-    print(f"Epoch {e+1}/{n_epochs}, Loss: {train_loss:.4f}")
-    scheduler.step(train_loss)
+    print(f"\nEpoch {e+1}/{n_epochs}, Train Loss: {train_loss:.4f}, NLL: {nll:.4f}")
+    scheduler.step(nll)
     if (e + 1) % refresh_interval == 0:
         dataset.mix_data()
 
