@@ -1,3 +1,4 @@
+import sys
 import time
 from scipy.stats import gaussian_kde
 import matplotlib.pyplot as plt
@@ -8,9 +9,10 @@ import psutil
 
 class States(Dataset):
     def __init__(self, num_steps=500):
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cpu")
         print(f"Using device: {self.device}")
-        print(f"Torch version={torch.__version__}, cuda_available={torch.cuda.is_available()}")
+        print(f"Python version={sys.version}, Torch version={torch.__version__}, cuda_available={torch.cuda.is_available()}")
         print(f"Initial memory: {psutil.Process().memory_info().rss / 1024 ** 2:.2f} MB")
 
         print("Loading data...")
@@ -44,7 +46,7 @@ class States(Dataset):
         return (self.all_data[idx],
                 self.all_steps[idx],
                 self.eps[idx],
-                self.data[idx % self.n_points],
+                # self.data[idx % self.n_points],
                 self.all_labels[idx])
 
     def generate_sample(self, idx):
@@ -72,9 +74,9 @@ class States(Dataset):
         for i in range(total_samples):
             if i % 100_000 == 0:
                 print(f"Processing sample {i}/{total_samples}, "
-                      f"memory: {psutil.Process().memory_info().rss / 1024 ** 2:.2f} MB, "
-                      f"GPU memory: {torch.cuda.memory_allocated(self.device) / 1024 ** 2:.2f} MB")
-                torch.cuda.synchronize()  # Ensure CUDA operations complete
+                      f"memory: {psutil.Process().memory_info().rss / 1024 ** 2:.2f} MB, ")
+                      # f"GPU memory: {torch.cuda.memory_allocated(self.device) / 1024 ** 2:.2f} MB")
+                # torch.cuda.synchronize()  # Ensure CUDA operations complete
 
             # Generate & cache sample
             x_, t, e, x, y = self.generate_sample(i)
@@ -86,7 +88,7 @@ class States(Dataset):
             if i % 100_000 == 0:
                 torch.cuda.empty_cache()
 
-        torch.cuda.synchronize()  # Ensure CUDA operations complete
+        # torch.cuda.synchronize()  # Ensure CUDA operations complete
         torch.cuda.empty_cache()
         print(f"Dataset initialized, took {time.time() - start_time:.2f}s")
         print(f"Memory after mix_data: {psutil.Process().memory_info().rss / 1024 ** 2:.2f} MB")

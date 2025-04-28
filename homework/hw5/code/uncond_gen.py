@@ -2,9 +2,9 @@ import os
 import torch
 import torch.nn as nn
 import numpy as np
-from torch.utils.data import DataLoader
+# from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
-from tqdm import trange, tqdm
+# from tqdm import trange, tqdm
 plt.switch_backend("agg")
 
 from models import MLP
@@ -26,12 +26,11 @@ torch.manual_seed(777)
 # Training parameters
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 batch_size = 10_000
-n_epochs = 5_00
+n_epochs = 5_000
 lr = 0.001
 weight_decay = 1e-4
 n_steps = 500
-n_workers = 4
-refresh_interval = 100  # Refresh noise
+refresh_interval = 1000  # Refresh noise
 
 # Create the denoiser model
 denoiser = MLP(input_dim=3, output_dim=2, hidden_layers=[256, 256, 256, 256]).to(device)
@@ -46,21 +45,11 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     patience=5,
 )
 
-def custom_collate(batch):
-    # batch is a list of tuples (x_, t, eps, x, y) from States.__getitem__
-    x_ = torch.stack([item[0] for item in batch]).to(device)
-    t = torch.stack([item[1] for item in batch]).to(device)
-    eps = torch.stack([item[2] for item in batch]).to(device)
-    x = torch.stack([item[3] for item in batch]).to(device)
-    y = torch.tensor([item[4] for item in batch], dtype=torch.long, device=device)  # [batch_size]
-    return x_, t, eps, x, y
-
 # Create the dataset and dataloader
 print("Creating dataset...")
 dataset = States(num_steps=n_steps)
 print("Dataset created")
 dataset.show(save_to=os.path.join(plot_dir, "original_data.png"))
-train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=n_workers, collate_fn=custom_collate)
 
 train_loss_list = []
 nll_list = []
@@ -68,8 +57,9 @@ def train_one_epoch(epoch):
     denoiser.train()
     total_loss = 0
     try:
-        for batch in tqdm(train_loader, leave=False, desc=f"Train epoch {epoch + 1}/{n_epochs}"):
-            x_, t, eps, x, y = batch
+        for i in range(0, len(dataset), batch_size):
+            x_, t, eps, y = dataset[i:i + batch_size]
+            x_, t, eps, y = x_.to(device), t.to(device), eps.to(device), y.to(device)
 
             optimizer.zero_grad() # Zero the gradient
             input_ = torch.cat([x_, t], dim=1) # Concatenate x_t and t
@@ -94,12 +84,12 @@ def sample(num_samples=2000):
     z = torch.randn(num_samples, 2).to(device)  # Start with noise
 
     for i in range(n_steps - 1, -1, -1):
-        t = dataset.steps[i].expand(num_samples, 1)
+        t = dataset.steps[i].expand(num_samples, 1).to(device)
         z_ = torch.cat([z, t], dim=1)
         eps = denoiser(z_)
-        alpha_bar_t = dataset.alpha_bar[i]
-        alpha_t = dataset.alpha[i]
-        beta_t = dataset.beta[i]
+        alpha_bar_t = dataset.alpha_bar[i].to(device)
+        alpha_t = dataset.alpha[i].to(device)
+        beta_t = dataset.beta[i].to(device)
 
         # DDPM sampling step
         z = (z - (1 - alpha_t) / torch.sqrt(1 - alpha_bar_t) * eps) / torch.sqrt(alpha_t)
@@ -110,7 +100,8 @@ def sample(num_samples=2000):
     nll = dataset.calc_nll(z)
     return nll, z
 
-for e in trange(n_epochs):
+
+for e in range(n_epochs):
     train_loss = train_one_epoch(e)
     train_loss_list.append(train_loss)
     nll, z = sample()
