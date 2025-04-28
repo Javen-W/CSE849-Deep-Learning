@@ -18,17 +18,18 @@ torch.manual_seed(777)
 
 # training parameters
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-batch_size = None
-num_epochs = None
 n_steps = 500
 
 # create the same classifier as in classifier.py and load the weights.
 # Set it to eval mode.
-classifier = None
-logsoftmax = None # create log-softmax
+classifier = MLP(input_dim=3, output_dim=5, hidden_layers=[100, 200, 500]).to(device)
+classifier.load_state_dict(torch.load(os.path.join(checkpoints_dir, "classifier.pt"), weights_only=True))
+classifier.eval()
+logsoftmax = nn.LogSoftmax() # create log-softmax
 
 # create your denoiser model architecture and load the weights from uncond_gen.py
-denoiser = None
+denoiser = MLP(input_dim=3, output_dim=2, hidden_layers=[256, 256, 256, 256]).to(device)
+denoiser.load_state_dict(torch.load(os.path.join(checkpoints_dir, "denoiser.pt"), weights_only=True))
 
 dataset = States(num_steps=n_steps)
 dataset.show(save_to=os.path.join(plot_dir, "original_data.png"))
@@ -37,12 +38,11 @@ def sample(label, num_samples=1000):
     denoiser.eval()
     z = None # start with random noise
 
-    for i in np.arange(n_steps-1, 0, -1):
+    for i in np.arange(n_steps - 1, 0, -1):
         t = None # get the time step
         z_ = torch.cat([z, t], dim=1)
         eps = None # get the denoiser prediction
-        # compute the gradient of the log-softmax classifier w.r.t. the
-        # input.
+        # compute the gradient of the log-softmax classifier w.r.t. the input.
         cls_grad = None
         eps_hat = None # compute eps_hat
         z = None # compute z for the next step
