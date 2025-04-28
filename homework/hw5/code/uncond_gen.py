@@ -109,6 +109,7 @@ def save_training():
     dataset.show(z, os.path.join(plot_dir, "final.png"))
     np.save(os.path.join(plot_dir, "uncond_gen_samples.pt"), z)
     torch.save(denoiser.state_dict(), os.path.join(checkpoints_dir, "denoiser.pt"))
+    print(f"Saved Training: NLL={nll:.4f}")
 
     fig, axs = plt.subplots(1, 2, figsize=(10, 5))
     axs[0].plot(train_loss_list)
