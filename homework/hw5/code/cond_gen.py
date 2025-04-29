@@ -73,6 +73,6 @@ for label in range(5):
     full_z = np.concatenate(full_z, axis=0)
     nll = dataset.calc_nll(full_z)
     print(f"Label {label}, NLL: {nll:.4f}")
-    dataset.show(z, os.path.join(plot_dir, f"label_{label}.png"))
+    dataset.show(full_z, os.path.join(plot_dir, f"label_{label}.png"))
     np.save(os.path.join(plot_dir, f"cond_gen_samples_{label}.npy"), full_z)
 
