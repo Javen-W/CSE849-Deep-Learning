@@ -151,10 +151,10 @@ Implemented diffusion models for unconditional and conditional sample generation
 - Utilized PyTorch’s optimizers (SGD, Adam, AdamW) and loss functions (MSE, cross-entropy) to optimize model performance, achieving low errors and high accuracy.
 
 **Libraries and Tools**:
-- **NumPy**: Applied for data preprocessing and computation, including synthetic data generation with noise in Project 0, gradient calculations for the spiral function in Project 1, image preprocessing in Project 2, and text indexing in Project 3.
+- **NumPy**: Applied for data preprocessing and computation, including synthetic data generation with noise in Project 0, gradient calculations for the spiral function in Project 1, image preprocessing in Project 2, text indexing in Project 3, and processing 2D data and performing sampling operations in Project 4.
 - **torchvision**: Employed for dataset loading (e.g., ImageFolder for composite images) and image transformations (e.g., normalization, augmentations) in Project 2, and data utilities in Project 0 and Project 3.
-- **Matplotlib**: Created visualizations like loss curves and prediction plots in Project 0, trajectory plots for gradient descent in Project 1, filter visualizations and activation bar plots in Project 2, and loss curves and confusion matrices in Project 3.
-- **SciPy**: Evaluated sample quality with KDE-based NLL.
+- **Matplotlib**: Created visualizations like loss curves and prediction plots in Project 0, trajectory plots for gradient descent in Project 1, filter visualizations and activation bar plots in Project 2, loss curves and confusion matrices in Project 3, and prediction maps for model evaluation in Project 4.
+- **SciPy**: Evaluated sample quality with KDE-based NLL in Project 4.
 
 **NLP Capabilities**: 
 - Developed RNNs for review rating prediction using fine-tuned GloVe embeddings and Transformers for Pig Latin translation with learned character embeddings and positional encodings.
