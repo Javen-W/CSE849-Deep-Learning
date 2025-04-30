@@ -9,6 +9,7 @@ This repository contains my coursework for CSE849, a graduate-level Deep Learnin
   - [Homework 2: Derivatives for Batch Normalization](#homework-2-derivatives-for-batch-normalization)
   - [Project 2: Convolutional Neural Networks](#project-2-convolutional-neural-networks)
   - [Project 3: Sequence Modeling](#project-3-sequence-modeling)
+  - [Project 4: Generative Modeling with Diffusion Models](#project-4-generative-modeling-with-diffusion-models)
 - [Skills Demonstrated](#skills-demonstrated)
 
 ## Projects
@@ -87,8 +88,56 @@ This repository contains my coursework for CSE849, a graduate-level Deep Learnin
 
 **Key Skills**: RNNs, Transformers, NLP, GloVe embeddings, PyTorch sequence modeling.
 
+### Project 4: Generative Modeling with Diffusion Models
+
+#### Description
+Implemented diffusion models for unconditional and conditional sample generation on the "States" dataset, a 2D synthetic dataset of 5,000 points forming outlines of five U.S. states (Ohio, Wisconsin, Oklahoma, Idaho, Michigan). The project included three tasks: unconditional generation, training a classifier for state labels, and conditional generation guided by the classifier.
+
+#### Approach
+- **Task 1: Unconditional Generation**:
+  - Developed a denoising MLP (`MLP`, 4 layers, 256 units each) to estimate noise `ε̂` from noisy samples `xt` and timestep `t`, using PyTorch.
+  - Implemented forward diffusion with a linear `β` schedule (`β0=1e-4`, `βT=0.02`, `T=500`), computing `α`, `α_bar`, and noisy samples `xt = √α_bar_t * x0 + √(1-α_bar_t) * ε`.
+  - Trained the denoiser with MSE loss (`||ε - ε̂||2^2`), batch size 10,000, 300 epochs, AdamW optimizer (`lr=1e-3`, `weight_decay=1e-7`), and StepLR scheduler (`step=2`, `γ=0.99`).
+  - Sampled 5,000 points from `pinit = N(0,I)`, denoising over 500 steps to generate `pdata` samples, evaluating negative log-likelihood (NLL) with Gaussian KDE.
+- **Task 2: Classifier Training**:
+  - Built a classifier MLP (`MLP`, 3 layers: 100, 200, 500 units) to predict state labels (5 classes) from noisy samples `xt` and timestep `t`.
+  - Trained with cross-entropy loss, batch size 10,000, 50 epochs, Adam optimizer (`lr=1e-3`, `weight_decay=1e-4`), and ReduceLROnPlateau scheduler (`factor=0.5`, `patience=3`).
+  - Generated a prediction map visualizing classifier outputs on a grid, using `ListedColormap` for state-specific colors.
+- **Task 3: Conditional Generation**:
+  - Reused the unconditional denoiser and trained classifier, loading weights from `denoiser.pt` and `classifier.pt`.
+  - Implemented guided sampling by computing gradients of the classifier’s log-softmax output for a target label, adjusting the denoising step with `eps_hat = eps - √(1-α_bar_t) * cls_grad`.
+  - Generated 5,000 samples per state (5 batches of 1,000), evaluating NLL and saving scatter plots.
+
+#### Tools
+- **PyTorch**: Built and trained MLPs for denoising and classification, managed GPU operations.
+- **NumPy**: Handled data preprocessing and sampling.
+- **Matplotlib**: Visualized scatter plots, training curves, and classifier prediction maps.
+- **SciPy**: Computed NLL using `gaussian_kde`.
+- **Python**: Integrated data loading, model training, and sampling pipelines.
+
+#### Results
+- **Unconditional Generation**:
+  - Generated 5,000 samples resembling the States dataset’s distribution, saved as `uncond_gen_samples.pt`.
+  - Produced training loss and NLL curves, saved as `train_logs.png`, showing convergence.
+  - Saved per-epoch scatter plots in `outputs/plots/unconditional_generation/steps/`.
+- **Classifier Training**:
+  - Achieved low cross-entropy loss, with training curve saved as `train_logs.png`.
+  - Generated a prediction map (`classifier_predictions.png`), color-coding state classifications with decision boundaries.
+- **Conditional Generation**:
+  - Generated 5,000 samples per state, saved as `cond_gen_samples_{label}.npy`.
+  - Produced state-specific scatter plots (`label_{0-4}.png`), visually matching state outlines.
+  - Reported NLL for each state, indicating quality of conditional samples.
+- **Output**: Saved models (`denoiser.pt`, `classifier.pt`), plots, and samples in `outputs/plots/` and `checkpoints/`.
+
+#### Key Skills
+- Diffusion model implementation.
+- Probabilistic generative modeling.
+- MLP design and training.
+- Classifier-guided sampling.
+- Visualization of 2D data distributions.
+
 ## Skills Demonstrated
-**Deep Learning**: Designed and trained advanced architectures, including Convolutional Neural Networks (CNNs) for robust image classification, Transformers for sequence-to-sequence translation, RNNs for text classification, and MLPs for regression tasks. Implemented gradient descent and backpropagation manually, and explored batch normalization theoretically, ensuring a strong foundation in neural network mechanics.
+**Deep Learning**: Designed and trained advanced architectures, including Convolutional Neural Networks (CNNs) for robust image classification, Transformers for sequence-to-sequence translation, RNNs for text classification, MLPs for regression tasks. Implemented gradient descent and backpropagation manually, and explored batch normalization theoretically, ensuring a strong foundation in neural network mechanics.
 
 **PyTorch Proficiency**: Leveraged PyTorch extensively to build, train, and evaluate models across all projects. Used PyTorch’s tensor operations and autograd to implement custom datasets and linear models in Project 0, developed custom Linear, ReLU, and MSELoss modules for gradient descent and backpropagation in Project 1, constructed CNNs with convolutional, batch normalization, and pooling layers in Project 2, and implemented RNNs with packed sequences and Transformers with multi-head attention and positional encodings in Project 3. Utilized PyTorch’s optimizers (SGD, Adam, AdamW) and loss functions (MSE, cross-entropy) to optimize model performance, achieving low errors and high accuracy.
 
@@ -96,6 +145,7 @@ This repository contains my coursework for CSE849, a graduate-level Deep Learnin
 - NumPy: Applied for data preprocessing and computation, including synthetic data generation with noise in Project 0, gradient calculations for the spiral function in Project 1, image preprocessing in Project 2, and text indexing in Project 3.
 - torchvision: Employed for dataset loading (e.g., ImageFolder for composite images) and image transformations (e.g., normalization, augmentations) in Project 2, and data utilities in Project 0 and Project 3.
 - Matplotlib: Created visualizations like loss curves and prediction plots in Project 0, trajectory plots for gradient descent in Project 1, filter visualizations and activation bar plots in Project 2, and loss curves and confusion matrices in Project 3.
+- **SciPy**: Evaluated sample quality with KDE-based NLL.
 
 **NLP Capabilities**: Developed RNNs for review rating prediction using fine-tuned GloVe embeddings and Transformers for Pig Latin translation with learned character embeddings and positional encodings. Handled variable-length sequences with custom collation and autoregressive decoding, achieving strong performance in classification and translation tasks.
 
