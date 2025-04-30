@@ -129,6 +129,10 @@ Implemented diffusion models for unconditional and conditional sample generation
   - Reported NLL for each state, indicating quality of conditional samples.
 - **Output**: Saved models (`denoiser.pt`, `classifier.pt`), plots, and samples in `outputs/plots/` and `checkpoints/`.
 
+![steps](https://github.com/user-attachments/assets/99448a74-c5dd-4a8f-8f65-ca9a379c75dd)
+![denoiser_train_logs](https://github.com/user-attachments/assets/f1b7ec6f-fcbb-4c64-ae2e-58ceb57cd853)
+![label_0](https://github.com/user-attachments/assets/c1c3ac08-f5a2-4b5b-83a1-5c02c142200d)
+
 #### Key Skills
 - Diffusion model implementation.
 - Probabilistic generative modeling.
@@ -137,19 +141,31 @@ Implemented diffusion models for unconditional and conditional sample generation
 - Visualization of 2D data distributions.
 
 ## Skills Demonstrated
-**Deep Learning**: Designed and trained advanced architectures, including Convolutional Neural Networks (CNNs) for robust image classification, Transformers for sequence-to-sequence translation, RNNs for text classification, MLPs for regression tasks. Implemented gradient descent and backpropagation manually, and explored batch normalization theoretically, ensuring a strong foundation in neural network mechanics.
+**Deep Learning**:
+- Designed and trained advanced architectures, including Convolutional Neural Networks (CNNs) for robust image classification, Transformers for sequence-to-sequence translation, RNNs for text classification, MLPs for regression tasks, and Diffusion models for unconditional and conditional generative tasks.
+- Implemented gradient descent and backpropagation manually, and explored batch normalization theoretically, ensuring a strong foundation in neural network mechanics.
 
-**PyTorch Proficiency**: Leveraged PyTorch extensively to build, train, and evaluate models across all projects. Used PyTorch’s tensor operations and autograd to implement custom datasets and linear models in Project 0, developed custom Linear, ReLU, and MSELoss modules for gradient descent and backpropagation in Project 1, constructed CNNs with convolutional, batch normalization, and pooling layers in Project 2, and implemented RNNs with packed sequences and Transformers with multi-head attention and positional encodings in Project 3. Utilized PyTorch’s optimizers (SGD, Adam, AdamW) and loss functions (MSE, cross-entropy) to optimize model performance, achieving low errors and high accuracy.
+**PyTorch Proficiency**: 
+- Leveraged PyTorch extensively to build, train, and evaluate models across all projects.
+- Used PyTorch’s tensor operations and autograd to implement custom datasets and linear models in Project 0, developed custom Linear, ReLU, and MSELoss modules for gradient descent and backpropagation in Project 1, constructed CNNs with convolutional, batch normalization, and pooling layers in Project 2, implemented RNNs with packed sequences and Transformers with multi-head attention and positional encodings in Project 3, and implemented MLPs for denoising and classification components of a generative diffusion model in Project 4.
+- Utilized PyTorch’s optimizers (SGD, Adam, AdamW) and loss functions (MSE, cross-entropy) to optimize model performance, achieving low errors and high accuracy.
 
 **Libraries and Tools**:
-- NumPy: Applied for data preprocessing and computation, including synthetic data generation with noise in Project 0, gradient calculations for the spiral function in Project 1, image preprocessing in Project 2, and text indexing in Project 3.
-- torchvision: Employed for dataset loading (e.g., ImageFolder for composite images) and image transformations (e.g., normalization, augmentations) in Project 2, and data utilities in Project 0 and Project 3.
-- Matplotlib: Created visualizations like loss curves and prediction plots in Project 0, trajectory plots for gradient descent in Project 1, filter visualizations and activation bar plots in Project 2, and loss curves and confusion matrices in Project 3.
+- **NumPy**: Applied for data preprocessing and computation, including synthetic data generation with noise in Project 0, gradient calculations for the spiral function in Project 1, image preprocessing in Project 2, and text indexing in Project 3.
+- **torchvision**: Employed for dataset loading (e.g., ImageFolder for composite images) and image transformations (e.g., normalization, augmentations) in Project 2, and data utilities in Project 0 and Project 3.
+- **Matplotlib**: Created visualizations like loss curves and prediction plots in Project 0, trajectory plots for gradient descent in Project 1, filter visualizations and activation bar plots in Project 2, and loss curves and confusion matrices in Project 3.
 - **SciPy**: Evaluated sample quality with KDE-based NLL.
 
-**NLP Capabilities**: Developed RNNs for review rating prediction using fine-tuned GloVe embeddings and Transformers for Pig Latin translation with learned character embeddings and positional encodings. Handled variable-length sequences with custom collation and autoregressive decoding, achieving strong performance in classification and translation tasks.
+**NLP Capabilities**: 
+- Developed RNNs for review rating prediction using fine-tuned GloVe embeddings and Transformers for Pig Latin translation with learned character embeddings and positional encodings.
+- Handled variable-length sequences with custom collation and autoregressive decoding, achieving strong performance in classification and translation tasks.
 
-**Technical Proficiency**: Combined theoretical insights (e.g., batch normalization derivations, analytical gradients) with practical implementation, building robust ML pipelines. Demonstrated ability to preprocess diverse data types (synthetic, spatial coordinates, composite images, text), mitigate biases like shortcut learning, and analyze models via visualizations, aligning with machine learning engineering demands.
+**Technical Proficiency**: 
+- Combined theoretical insights (e.g., batch normalization derivations, analytical gradients) with practical implementation, building robust ML pipelines.
+- Demonstrated ability to preprocess diverse data types (synthetic, spatial coordinates, composite images, text), mitigate biases like shortcut learning, and analyze models via visualizations, aligning with machine learning engineering demands.
+- Applied probabilistic modeling concepts (e.g., forward/reverse diffusion, score-matching) to practical tasks.
+- Managed large-scale training (e.g., 2.5M samples, 10K batches) with memory-efficient preprocessing.
+- Delivered well-documented code and visualizations, suitable for research and engineering roles.
 
 
 
